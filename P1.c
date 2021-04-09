@@ -23,14 +23,14 @@
 #define ERR_OP_NO_PERMESA "Operació no permesa\n"
 #define ERR_NO_EXISTEIX "Fitxer no existeix\n"
 #define ERR_NO_ES_FORMAT_VALID "Sistema d’arxius no és ni EXT2 ni FAT16.\n\n"
-#define TITLE "------ Filesystem Information ------\n\n"
-#define INFO_INODE "\n\nINFO INODE\n"
-#define INFO_BLOC "\n\nINFO BLOC\n"
-#define INFO_VOLUM "\n\nINFO VOLUM\n"
+#define TITLE "\n\n------ Filesystem Information ------\n"
+#define INFO_INODE "\nINFO INODE\n"
+#define INFO_BLOC "\nINFO BLOC\n"
+#define INFO_VOLUM "\nINFO VOLUM\n"
 #define SUPERBLOCK_START 1024
 
 
-typedef struct superblock {
+typedef struct {
   uint32_t s_inodes_count;      // Total number of inodes
   uint32_t s_blocks_count;      // Total number of blocks
   uint32_t s_r_blocks_count;    // Number of reserved blocks
@@ -65,10 +65,12 @@ typedef struct superblock {
   uint32_t s_feature_ro_compat; // Required features for writing
   uint8_t  s_uuid[16];          // UUID (unique ID)
   char     s_volume_name[16];   // Volume name
-  char     s_last_mounted[64];  // Path where FS was last mounted
+  unsigned char     s_last_mounted[64];  // Path where FS was last mounted
   uint32_t s_algo_bitmap;       // Compression algorithm support
 
-} superblock_t;
+} SB;
+
+
 
 
 int main(int argc, char*argv[]){
@@ -90,10 +92,10 @@ int main(int argc, char*argv[]){
 
         write(1, TITLE, strlen(TITLE));
         
-        superblock_t *superblock;
+        SB *superblock;
         lseek(fdFitxer, SUPERBLOCK_START, SEEK_SET);
-        superblock = malloc(sizeof(superblock_t));
-        bytes = read(fdFitxer, superblock, sizeof(superblock_t));
+        superblock = malloc(sizeof(SB));
+        bytes = read(fdFitxer, superblock, sizeof(SB));
 
         if(superblock->s_magic != 0xEF53){
             write(1, ERR_NO_ES_FORMAT_VALID, strlen(ERR_NO_ES_FORMAT_VALID));
@@ -129,7 +131,7 @@ int main(int argc, char*argv[]){
         Frags grup: 8192
         */
 
-        printf("Mida Bloc: %u\n", superblock->s_log_block_size);                   
+        printf("Mida Bloc: %u\n", 1024 << superblock->s_log_block_size);                   
         printf("Blocs Reservats: %u\n", superblock->s_r_blocks_count);             
         printf("Blocs Lliures: %u\n", superblock->s_free_blocks_count);            
         printf("Total Blocs: %u\n", superblock->s_blocks_count);                   
@@ -155,8 +157,11 @@ int main(int argc, char*argv[]){
         muntatge_string = ctime(&muntatge);
         escriptura_string = ctime(&escriptura);
         comprov_string = ctime(&comprov);
-
-        printf("Nom volum: %s\n",superblock->s_volume_name);       
+        if(strlen(superblock->s_volume_name)==0){
+            printf("Nom volum: <EMPTY>\n");       
+        }else{
+            printf("Nom volum: %s\n",superblock->s_volume_name);       
+        }
         printf("Ultima comprov: %s",comprov_string);               
         printf("Ultim muntatge: %s",muntatge_string);              
         printf("Ultima escriptura: %s\n",escriptura_string);       
