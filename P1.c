@@ -71,38 +71,8 @@ typedef struct superblock {
 } superblock_t;
 
 
-
-/*
------- Filesystem Information ------
-
-Filesystem: EXT2
-
-INFO INODE
-Mida Inode: 128 
-Num Inodes: 64 
-Primer Inode: 11 
-Inodes Grup: 64 
-Inodes Lliures: 38
-
-INFO BLOC
-Mida Bloc: 1024 
-Blocs Reservats: 25 
-Blocs Lliures: 471 
-Total Blocs: 512 
-Primer Bloc: 1 
-Blocs grup: 8192 
-Frags grup: 8192
-
-INFO VOLUM
-Nom volum: ext2fs_prova1
-Ultima comprov: Tue Apr 24 18:41:24 2007 
-Ultim muntatge: Tue Apr 24 19:33:11 2007 
-Ultima escriptura: Tue Apr 24 19:33:16 2007
-*/
-
 int main(int argc, char*argv[]){
     int bytes;
-    //char* leer;
 
     if(argc<3){
         write(1, ERR_ARGUMENTS, strlen(ERR_ARGUMENTS));
