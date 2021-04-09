@@ -71,19 +71,78 @@ typedef struct {
 } SB;
 
 typedef struct {
-    unsigned char jmp[3];               //Code to jump to the boostrap code
-    char oem[8];                        //OEM ID - Name of th eformatting OS
-    unsigned short sector_size;         //Bytes per Sector
-    unsigned char sectors_per_cluster;  //Sectors per Cluster
-    unsigned short reserved_sectors;    //Reserved Sectors
-    unsigned char number_of_fats;       //Numer of FAT copies
-    unsigned short root_dir_entries;    //Number of possible root entries
-    unsigned short small_n_sectors;     //Small number of sectors
-    
-    
+    unsigned char BS_jmpBoot[3];      //Code to jump to the boostrap code
+    char BS_OEMName[8];               //OEM ID - Name of th eformatting OS
+    unsigned short BPB_BytsPerSec;    //Bytes per Sector
+    unsigned char BPB_SecPerClus;     //Sectors per Cluster
+    unsigned short BPB_RsvdSecCnt;    //Reserved Sectors
+    unsigned char BPB_NumFATs;        //Numer of FAT copies
+    unsigned short BPB_RootEntCnt;    //Number of possible root entries
+    unsigned short BPB_TotSec16;      //Small number of sectors
+    unsigned char BPB_Media;          //Media Descriptor
+    unsigned short BPB_FATSz16;       //Sectors per FAT
+    unsigned short BPB_SecPerTrk;     //Sectors per Track
+    unsigned short BPB_NumHeads;      //Number of Heads
+    int BPB_HiddSec;                  //Hidden sectors
+    int BPB_TotSec32;                 //Large number of sectors
+    unsigned char BS_DrvNum;          //Drive Number
+    unsigned char BS_Reserved1;       //Reserved
+    unsigned char BS_BootSig;         //Extended Boot Signatura
+    int BS_VolID;                     //Volume Serial Number
+    char BS_VolLab[11];               //Volume Label
+    char BS_FilSysType[8];            //File System Type
 } BootSector;
 
 
+int checkIfFat16(BootSector *bs){
+    short TotSec, FATSz;
+    int dataSec, countOfClusters;
+
+    if(bs->BPB_FATSz16 != 0){
+        FATSz = bs->BPB_FATSz16;
+    }else{
+        return 0;
+    }
+        
+    if(bs->BPB_TotSec16 != 0){
+        TotSec = bs->BPB_TotSec16;
+    }else{
+        TotSec = bs->BPB_TotSec32;
+    }
+
+    dataSec = -1*(TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
+
+    countOfClusters = dataSec / bs->BPB_SecPerClus;  
+    
+    /*
+    printf("DATASEC: %d\n", dataSec);
+    printf("%hu - (%u + %u * %hu) + ((%hu * 32) + (%hu - 1)) / %hu )\n", TotSec, bs->BPB_RsvdSecCnt, bs->BPB_NumFATs, FATSz, bs->BPB_RootEntCnt, bs->BPB_BytsPerSec, bs->BPB_BytsPerSec);
+    
+    printf("\nCount of Clusters: %d\n", countOfClusters);
+    printf("%d / %u\n\n", dataSec,bs->BPB_SecPerClus);
+    */
+    if(countOfClusters < 4085) {
+       return 0;
+    } else if(countOfClusters < 65525) {
+        return 1;
+    } else {
+       return 0;
+    }
+
+}
+
+
+char* cleanLabel(char cadena[11]){
+    char *token;
+    char s[2] = " ";
+    token = strtok(cadena, s);
+    /*while( token != NULL ) {
+      printf( " %s\n", token );
+    
+      token = strtok(NULL, s);
+   }*/
+   return token;
+}
 
 
 int main(int argc, char*argv[]){
@@ -106,6 +165,8 @@ int main(int argc, char*argv[]){
         write(1, TITLE, strlen(TITLE));
         
         SB *superblock;
+        BootSector *bs;
+
         lseek(fdFitxer, SUPERBLOCK_START, SEEK_SET);
         superblock = malloc(sizeof(SB));
         bytes = read(fdFitxer, superblock, sizeof(SB));
@@ -114,7 +175,12 @@ int main(int argc, char*argv[]){
             systemType = 1;
         }else{
             lseek(fdFitxer, 0, SEEK_SET);
-            systemType = 2;
+            bs = malloc(sizeof(BootSector));
+            bytes = read(fdFitxer, bs, sizeof(BootSector));
+
+            if(checkIfFat16(bs)){
+                systemType=2;
+            }
         }  
 
 
@@ -182,7 +248,7 @@ int main(int argc, char*argv[]){
                 }
                 printf("Ultima comprov: %s",comprov_string);               
                 printf("Ultim muntatge: %s",muntatge_string);              
-                printf("Ultima escriptura: %s\n",escriptura_string);       
+                printf("Ultima escriptura: %s\n\n",escriptura_string);       
 
                 break;
             case 2:
@@ -198,14 +264,15 @@ int main(int argc, char*argv[]){
                 Label: EXEMPLE2
                 */
                 printf("\nFilesystem: FAT16\n");
-                printf("System Name:\n");
-                printf("Mida del sector:\n");
-                printf("Sectors Per Cluster:\n");
-                printf("Sectors reservats:\n");
-                printf("Número de FATs:\n");
-                printf("MaxRootEntries:\n");
-                printf("Sectors per FAT:\n");
-                printf("Label:\n");
+                printf("System Name: %s\n", bs->BS_OEMName);
+                printf("Mida del sector: %hu\n", bs->BPB_BytsPerSec);
+                printf("Sectors Per Cluster: %u\n", bs->BPB_SecPerClus);
+                printf("Sectors reservats: %hu\n", bs->BPB_RsvdSecCnt);
+                printf("Número de FATs: %u\n", bs->BPB_NumFATs);
+                printf("MaxRootEntries: %hu\n", bs->BPB_RootEntCnt);
+                printf("Sectors per FAT: %hu\n", bs->BPB_FATSz16);
+                char* token = cleanLabel(bs->BS_VolLab);
+                printf("Label: %s\n\n\n", token);
                 
                 break;
 
