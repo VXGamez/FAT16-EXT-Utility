@@ -136,11 +136,6 @@ char* cleanLabel(char cadena[11]){
     char *token;
     char s[2] = " ";
     token = strtok(cadena, s);
-    /*while( token != NULL ) {
-      printf( " %s\n", token );
-    
-      token = strtok(NULL, s);
-   }*/
    return token;
 }
 
@@ -285,5 +280,11 @@ int main(int argc, char*argv[]){
 
        
         close(fdFitxer);
+        if(bs!=NULL){
+            free(bs);
+        }
+        free(superblock);
+
+       
     }
 }
