@@ -1,7 +1,7 @@
 # SOA
 
 <p align="center">
-  <a href="http://linkedin.com/">
+  <a href="">
   <img src="https://img.shields.io/badge/FASE-1-brightgreen?style=for-the-badge&logo=c">
   </a>
 </p>
