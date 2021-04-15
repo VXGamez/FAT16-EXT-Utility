@@ -12,7 +12,7 @@
     <li><a href="#com-compilar">Com Compilar</a></li>
     <li><a href="#explicació-dels-sistemes-de-fitxers">Explicació dels Sistemes de Fitxers</a>
       <ul>
-        <li><a href="#fat12">FAT12</a></li>
+        <li><a href="#fat16">FAT16</a></li>
         <li><a href="#ext">EXT</a></li>
       </ul>
     </li>
@@ -48,21 +48,21 @@
 
 ## Explicació dels Sistemes de Fitxers
 
-De cara a aquesta entrega se'ns ha demanat que explorem l'organització dels fitxers de dos sistemes de fitxers diferents: FAT12 i EXT. Per assolir aquesta exploració se'ns han proveït dos fitxers, un EXT i l'altre FAT12, així com una explicació detallada de com fer-ne més tot i que jo no n'he realitzat cap per aquesta entrega.
+De cara a aquesta entrega se'ns ha demanat que explorem l'organització dels fitxers de dos sistemes de fitxers diferents: FAT16 i EXT. Per assolir aquesta exploració se'ns han proveït dos fitxers, un EXT i l'altre FAT16, així com una explicació detallada de com fer-ne més tot i que jo no n'he realitzat cap per aquesta entrega.
 
-### FAT12
+### FAT16
 
-La taula d'assignació de fitxers (File Allocation Table - FAT) és una taula emmagatzemada en un disc dur o disquet que indica el fitxer estat i ubicació de tots els clústers de dades que hi ha al disc. La taula d'assignació de fitxers pot ser es considera la "taula de continguts" d'un disc. Si la taula d'assignació de fitxers es fa malbé o es perd, llavors a el disc no es pot llegir. En el cas de FAT12, és el sistema de fitxers d’un disquet. El número "12" es deriva del fet que el FAT consta d'entrades de 12 bits.
+La taula d'assignació de fitxers (File Allocation Table - FAT) és una taula emmagatzemada en un disc dur o disquet que indica el fitxer estat i ubicació de tots els clústers de dades que hi ha al disc. La taula d'assignació de fitxers pot ser es considera la "taula de continguts" d'un disc. Si la taula d'assignació de fitxers es fa malbé o es perd, llavors a el disc no es pot llegir. En el cas de FAT16, és el sistema de fitxers d’un disquet. El número "16" es deriva del fet que el FAT consta d'entrades de 16 bits.
 
 L’espai d’emmagatzematge d’un disquet es divideix en unitats anomenades sectors. En dispositius d'emmagatzematge més grans, a un conjunt de sectors formen un clúster. No obstant això, per al disquet, el nombre de sectors en un clúster és un. A més, la mida d'un sector (i, per tant, d'un clúster) és de 512 bytes per a un disquet.
 
-El disseny d'un disquet FAT-12 consta de quatre seccions principals: el Boot Sector, les taules FAT, el directori root i l'àrea de dades.
+El disseny d'un disquet FAT-16 consta de quatre seccions principals: el Boot Sector, les taules FAT, el directori root i l'àrea de dades.
 
 El Boot Sector, o sector d'arrencada, és en el primer sector (sector 0) del volum o del disc. Conté informació específica sobre la resta d'organitzacions del sistema de fitxers, per exemple quantes còpies de taules FAT hi ha, com de gran és un sector, quants sectors hi ha en un clúster, etc.
 
 Les taules FAT contenen punters a tots els clústers del disc e indiquen el número del següent clúster de la cadena de clústers actual així com el final de la cadena de clúster, si un clúster està buit o si aquest té errors. Les taules FAT són l'únic mètode per trobar la ubicació de fitxers i directoris a la resta del disc. Normalment, hi ha dues còpies redundants de la taula FAT al disc per finalitats de seguretat i recuperació de dades.
 
-El directori root és el directori principal del disc. A diferència d'altres directoris situats a l'àrea de dades del disc, el directori root té una mida finita (per a FAT12, 14 sectors * 16 entrades de directori per sector = 224 entrades possibles), restringint la quantitat total de fitxers o directoris que es poden crear-hi.
+El directori root és el directori principal del disc. A diferència d'altres directoris situats a l'àrea de dades del disc, el directori root té una mida finita (per a FAT16, 14 sectors * 16 entrades de directori per sector = 224 entrades possibles), restringint la quantitat total de fitxers o directoris que es poden crear-hi.
 
 A l'àrea de dades, el primer sector o clúster de l'àrea de dades correspon al clúster 2 del fitxer sistema. L'àrea de dades conté dades de fitxers i directoris i abasta la resta de sectors del disc.
 
@@ -81,6 +81,8 @@ Pel que fa a l’ordenació d’elements d’un grup de blocs, generalment s’e
 ## Explicació de la pràctica
 
 ### Requeriments
+
+De cara a executar aquesta pràctica crec només hi ha un parell de requeriments que son compilar el programa, i tenir els fitxers en el directori per poder-li passar com a arguments quan s'executi.
 
 ### Disseny
 
@@ -170,6 +172,11 @@ El temps emprat per la realització d'aquesta fase no ha estat gaire elevat. Tot
 
 ## Explicació i valoració del GIT
 
+Git com a sistema de control de versions és molt comú a la realització de projectes, i és un entorn de treball real i que ens trobarem el dia de demà a l'empresa que sigui que treballem. M'ha servit per estructura el projecte amb diferents branques, diferents espais on he implementat individualment funcionalitats abans de juntar-les al projecte final.
+
 ## Conclusions generals
 
+Aquesta fase ha estat una primera introducció als sistemes de fitxers que ha estat molt interessant. Ja havia treballat anteriorment la teoria que s'ha treballat aqui a SOA a ASO però clarament no amb aquest nivell de profunditat ja que allà treballavem amb comandes que ens donaven tota la informació que cerquem en aquesta pràctica. 
+
+És per això que considero haver après bastant, i havent llegit el contingut de les properes fases, crec que seguiré aprenent més sobre aquests sistemes i el seu funcionament.
 
