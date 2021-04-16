@@ -1,8 +1,8 @@
 all: P1
 
 clean:
-	rm P1
 	rm *.o
+	rm p1
 
 utils.o:
 	gcc moduls/utils.c -c

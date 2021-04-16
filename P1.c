@@ -6,14 +6,24 @@
 int main(int argc, char*argv[]){
     int bytes;
     int systemType=0;
+    int operationType=0;
 
-    if(argc<3){
+    if(argc<2){
         write(1, ERR_ARGUMENTS, strlen(ERR_ARGUMENTS));
     }else{
-        if(strcmp(argv[1], "/intro") != 0){
+        if( (operationType = UTILS_checkOperation(argv[1])) == 0){
             write(1, ERR_OP_NO_PERMESA, strlen(ERR_OP_NO_PERMESA));
             return 0;
+        }else{
+            if(operationType == 1 && argc !=3){
+                write(1, ERR_ARGUMENTS, strlen(ERR_ARGUMENTS));
+                return 0;
+            }else if(operationType == 2 && argc !=4){
+                write(1, ERR_ARGUMENTS, strlen(ERR_ARGUMENTS));
+                return 0;
+            }
         }
+
         int fdFitxer = open(UTILS_fileInDirectory("fitxers", argv[2]), O_RDONLY);
         if(fdFitxer<0){
             write(1, ERR_NO_EXISTEIX, strlen(ERR_NO_EXISTEIX));

@@ -22,7 +22,7 @@
 #include <time.h>
 
 
-#define ERR_ARGUMENTS "No hi ha suficients arguments\n"
+#define ERR_ARGUMENTS "El número d'arguments és incorrecte\n"
 #define ERR_OP_NO_PERMESA "Operació no permesa\n"
 #define ERR_NO_EXISTEIX "Fitxer no existeix\n"
 #define ERR_NO_ES_FORMAT_VALID "Sistema d’arxius no és ni EXT2 ni FAT16.\n\n"
@@ -31,8 +31,12 @@
 #define INFO_BLOC "\nINFO BLOC\n"
 #define INFO_VOLUM "\nINFO VOLUM\n"
 #define SUPERBLOCK_START 1024
+#define ACCEPTED_OPERATIONS 2
+
+static const char acceptedOperations[2][20] = {"/intro", "/find"};
 
 char* UTILS_cleanLabel(char cadena[11]);
 char* UTILS_fileInDirectory(char* directory, char* fileName);
+int UTILS_checkOperation(char* operation);
 
 #endif
