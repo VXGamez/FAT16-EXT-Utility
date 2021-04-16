@@ -37,3 +37,27 @@ int FAT_checkIfFat16(BootSector *bs){
     }
 
 }
+
+
+void FAT_printBootSector(BootSector *bs){
+    /*
+    Filesystem: FAT16
+    System Name: SALLEFAT
+    Mida del sector: 1024
+    Sectors Per Cluster: 1
+    Sectors reservats: 1
+    Número de FATs: 2
+    MaxRootEntries: 100
+    Sectors per FAT: 2
+    Label: EXEMPLE2
+    */
+    printf("System Name: %s\n", bs->BS_OEMName);
+    printf("Mida del sector: %hu\n", bs->BPB_BytsPerSec);
+    printf("Sectors Per Cluster: %u\n", bs->BPB_SecPerClus);
+    printf("Sectors reservats: %hu\n", bs->BPB_RsvdSecCnt);
+    printf("Número de FATs: %u\n", bs->BPB_NumFATs);
+    printf("MaxRootEntries: %hu\n", bs->BPB_RootEntCnt);
+    printf("Sectors per FAT: %hu\n", bs->BPB_FATSz16);
+    char* token = SYS_cleanLabel(bs->BS_VolLab);
+    printf("Label: %s\n\n\n", token);
+}

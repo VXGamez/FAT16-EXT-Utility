@@ -4,8 +4,8 @@ clean:
 	rm *.o
 	rm p1
 
-utils.o:
-	gcc moduls/utils.c -c
+sistema.o:
+	gcc moduls/sistema.c -c
 
 fat.o:
 	gcc moduls/fat.c -c
@@ -16,5 +16,5 @@ ext.o:
 P1.o:
 	gcc P1.c -c
 
-P1: utils.o fat.o ext.o P1.o
-	gcc utils.o fat.o ext.o P1.o -o p1
+P1: sistema.o fat.o ext.o P1.o
+	gcc sistema.o fat.o ext.o P1.o -o p1
