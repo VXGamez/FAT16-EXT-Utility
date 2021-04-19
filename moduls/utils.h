@@ -34,7 +34,7 @@
 #define SUPERBLOCK_START 1024
 #define ACCEPTED_OPERATIONS 2
 
-static const char acceptedOperations[2][20] = {"/intro", "/find"};
+static const char acceptedOperations[2][20] = {"/info", "/find"};
 
 typedef struct {
   uint32_t s_inodes_count;      // Total number of inodes
@@ -94,7 +94,6 @@ typedef struct {
     unsigned char BS_DrvNum;          //Drive Number
     unsigned char BS_Reserved1;       //Reserved
     unsigned char BS_BootSig;         //Extended Boot Signatura
-    int BS_VolID;                     //Volume Serial Number
     char BS_VolLab[11];               //Volume Label
     char BS_FilSysType[8];            //File System Type
 }BootSector;
