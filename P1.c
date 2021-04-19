@@ -54,17 +54,12 @@ int main(int argc, char*argv[]){
 
             }
         }else if(operationType == 2){
-            int fdFile = open(SYS_fileInDirectory("fitxers", argv[3]), O_RDONLY);
-            if(fdFile<0){
-                SYS_fileNotFound(fdFile, operationType);
-                return 0;
-            }
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
                 printf("Estem en mode /find\n");
 
-                close(fdFile);
+                //argv[3]
             }
             
         }
