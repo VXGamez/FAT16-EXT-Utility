@@ -32,6 +32,7 @@
 #define INFO_BLOC "\nINFO BLOC\n"
 #define INFO_VOLUM "\nINFO VOLUM\n"
 #define SUPERBLOCK_START 1024
+#define GROUP_DESCRIPTORS_SIZE 32
 #define ACCEPTED_OPERATIONS 2
 
 static const char acceptedOperations[2][20] = {"/info", "/find"};
@@ -98,5 +99,32 @@ typedef struct {
     char BS_FilSysType[8];            //File System Type
 }BootSector;
 
+
+typedef struct {
+  uint16_t i_mode;        // Mode (type of file and permissions)
+  uint16_t i_uid;         // Owner's user ID
+  uint32_t i_size;        // File size (least significant 32 bits)
+  uint32_t i_atime;       // Last access time
+  uint32_t i_ctime;       // Creation time
+  uint32_t i_mtime;       // Last modification time
+  uint32_t i_dtime;       // Deletion time
+  uint16_t i_gid;         // Owner's group ID
+  uint16_t i_links_count; // Reference counter (number of hard links)
+  uint32_t i_blocks;      // Number of 512-byte blocks reserved for this inode
+  uint32_t i_flags;       // Flags
+  uint32_t i_osd1;        // OS-dependant value
+  uint32_t i_block[15];   //Bloqueh
+  uint32_t i_generation;  // File version (used for NFS)
+  uint32_t i_file_acl;    // Block number for extended attributes
+  uint32_t i_dir_acl;     // File size (most significant 32 bits)
+  uint32_t i_faddr;       // Location of file fragment (deprecated)
+} inode;
+
+typedef struct{
+  uint32_t inode;
+  uint16_t rec_len;
+  uint8_t name_len;
+  uint8_t file_type;
+}ino_block;
 
 #endif

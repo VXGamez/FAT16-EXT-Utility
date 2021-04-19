@@ -61,6 +61,8 @@ int main(int argc, char*argv[]){
                 printf("Estem en mode /find\n");
                 
                 //argv[3]
+                int bytes = EXT_findFile(argv[3], fdFitxer, superblock);
+                
             }
             
         }
