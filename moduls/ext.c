@@ -68,15 +68,24 @@ void EXT_printSuperblock(SB* superblock){
 
 
 int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
-    //inode ino = EXT_readIno(fdVolum, superblock->s_first_ino, superblock->s_first_ino);
-    //lseek(fdVolum, SUPERBLOCK_START, SEEK_SET);
-    lseek(fdVolum, SUPERBLOCK_START + 1024 + 3*(sb->s_log_block_size), SEEK_SET);
-    lseek(fdVolum, sb->s_first_ino*sb->s_inode_size, SEEK_CUR);
-    inode ino;
-    read(fdVolum, &ino, sizeof(inode));
-    lseek(fdVolum, SUPERBLOCK_START + 1024 + 3*(sb->s_log_block_size), SEEK_SET);
-    lseek(fdVolum, 214*(sb->s_log_block_size),SEEK_CUR);
-    printf("Block size: %d\n", ino.i_blocks);
+
+
+    int num_groups = (sb->s_blocks_count + sb->s_blocks_per_group - 1 )/ sb->s_blocks_per_group;
+    GroupDescriptor* groupbuffer = malloc(sizeof(GroupDescriptor)*num_groups);
+    int block_size = 1024 << sb->s_log_block_size;
+
+    lseek(fdVolum, (sb->s_first_data_block+1)*block_size, SEEK_SET);
+    read(fdVolum, groupbuffer, num_groups*sizeof(GroupDescriptor));
+
+    int block_group = (sb->s_first_ino - 1) / sb->s_inodes_per_group;
+    int index = (sb->s_first_ino - 1) % sb->s_inodes_per_group;
+    int offset = index*sb->s_inode_size;
+    int group_table =  groupbuffer[block_group].bg_inode_table + block_group*sb->s_blocks_per_group;
+
+    inodo ino;
+
+    pread(fdVolum, &ino, sizeof(inodo), (group_table*block_size)+offset);
+
     char kk;
     printf("Enter per continuar: ");
     scanf("%c", &kk);

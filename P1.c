@@ -4,7 +4,6 @@
 
 
 int main(int argc, char*argv[]){
-    int bytes;
     int systemType=0;
     int operationType=0;
 

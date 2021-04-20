@@ -99,6 +99,16 @@ typedef struct {
     char BS_FilSysType[8];            //File System Type
 }BootSector;
 
+typedef struct{
+    uint32_t bg_block_bitmap;
+    uint32_t bg_inode_bitmap;
+    uint32_t bg_inode_table;
+    uint16_t bg_free_blocks_count;
+    uint16_t bg_free_inodes_count;
+    uint16_t bg_used_dirs_count;
+    uint16_t bg_pad;
+    unsigned char bg_reserved[12];
+}GroupDescriptor;
 
 typedef struct {
   uint16_t i_mode;        // Mode (type of file and permissions)
@@ -118,7 +128,8 @@ typedef struct {
   uint32_t i_file_acl;    // Block number for extended attributes
   uint32_t i_dir_acl;     // File size (most significant 32 bits)
   uint32_t i_faddr;       // Location of file fragment (deprecated)
-} inode;
+  unsigned char i_osd2[12];
+} inodo;
 
 typedef struct{
   uint32_t inode;
