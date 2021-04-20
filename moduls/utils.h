@@ -20,6 +20,8 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <time.h>
+#include <inttypes.h>
+
 
 #define ERR_ARGUMENTS "El número d'arguments és incorrecte\n"
 #define ERR_OP_NO_PERMESA "Operació no permesa\n"
