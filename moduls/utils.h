@@ -97,10 +97,20 @@ typedef struct {
     unsigned char BS_DrvNum;          //Drive Number
     unsigned char BS_Reserved1;       //Reserved
     unsigned char BS_BootSig;         //Extended Boot Signatura
-    //int BS_VolID;                     //Volume Serial Number
+    //int BS_VolID;                   //Volume Serial Number
     char BS_VolLab[11];               //Volume Label
     char BS_FilSysType[8];            //File System Type
 }BootSector;
+
+typedef struct {
+    char long_name[32];                    //The file's name, truncated to 31 characters.
+    uint8_t attributes;                    //The file's attributes. Mask of the FAT16_ATTRIB_* constants.
+    /** The time the file was last modified. */
+    //uint16_t modified_time;
+    uint16_t cluster;                       //The cluster in which the file's first byte resides.
+    uint32_t file_size;                     //The file's size
+    uint32_t entry_offset;                  //The total disk offset of this directory entry.
+}dir_entry;
 
 typedef struct{
     uint32_t bg_block_bitmap;

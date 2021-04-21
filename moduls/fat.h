@@ -6,5 +6,6 @@
 
 int FAT_checkIfFat16(BootSector *bs);
 void FAT_printBootSector(BootSector *bs);
+int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs);
 
 #endif

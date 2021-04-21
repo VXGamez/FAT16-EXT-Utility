@@ -59,3 +59,10 @@ void FAT_printBootSector(BootSector *bs){
     char* token = SYS_cleanLabel(bs->BS_VolLab);
     printf("Label: %s\n\n\n", token);
 }
+
+int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs){
+
+
+
+    return 0;
+}

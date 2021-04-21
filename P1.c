@@ -53,14 +53,15 @@ int main(int argc, char*argv[]){
 
             }
         }else if(operationType == 2){
-
+            int bytes;
             
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
+                SYS_removeExtension(fitxer);
                 switch(systemType){
                     case 1:
-                        int bytes = EXT_findFile(argv[3], fdFitxer, superblock);
+                        bytes = EXT_findFile(argv[3], fdFitxer, superblock);
                         if(bytes < 0){
                             printf("\nError. Fitxer no trobat.\n\n");
                         }else{
@@ -69,12 +70,13 @@ int main(int argc, char*argv[]){
                         break;
                     case 2:
                         printf("\nFilesystem: FAT16\n");
-
-
+                        bytes = FAT_findFile(argv[3], fdFitxer, bs);
+                        if(bytes < 0){
+                            printf("\nError. Fitxer no trobat.\n\n");
+                        }else{
+                            printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                        }
                         break;
-                    default:
-                        break;
-
                 }
             }
             
