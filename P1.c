@@ -58,11 +58,23 @@ int main(int argc, char*argv[]){
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
-                int bytes = EXT_findFile(argv[3], fdFitxer, superblock);
-                if(bytes < 0){
-                    printf("\nError. Fitxer no trobat.\n\n");
-                }else{
-                    printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                switch(systemType){
+                    case 1:
+                        int bytes = EXT_findFile(argv[3], fdFitxer, superblock);
+                        if(bytes < 0){
+                            printf("\nError. Fitxer no trobat.\n\n");
+                        }else{
+                            printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                        }
+                        break;
+                    case 2:
+                        printf("\nFilesystem: FAT16\n");
+
+
+                        break;
+                    default:
+                        break;
+
                 }
             }
             
