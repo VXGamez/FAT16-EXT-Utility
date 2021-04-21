@@ -18,9 +18,7 @@ int FAT_checkIfFat16(BootSector *bs){
     }
 
     dataSec = -1*(TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
-
     countOfClusters = dataSec / bs->BPB_SecPerClus;  
-    
     /*
     printf("DATASEC: %d\n", dataSec);
     printf("%hu - (%u + %u * %hu) + ((%hu * 32) + (%hu - 1)) / %hu )\n", TotSec, bs->BPB_RsvdSecCnt, bs->BPB_NumFATs, FATSz, bs->BPB_RootEntCnt, bs->BPB_BytsPerSec, bs->BPB_BytsPerSec);

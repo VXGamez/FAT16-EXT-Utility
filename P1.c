@@ -4,7 +4,6 @@
 
 
 int main(int argc, char*argv[]){
-    int bytes;
     int systemType=0;
     int operationType=0;
 
@@ -37,8 +36,8 @@ int main(int argc, char*argv[]){
 
         systemType = SYS_getSystemType(fdFitxer, &superblock, &bs);
 
-    
         if(operationType == 1){
+            printf("Entro primer if\n");
             switch(systemType){
                 case 1:
                     printf("\nFilesystem: EXT2\n");
@@ -54,12 +53,17 @@ int main(int argc, char*argv[]){
 
             }
         }else if(operationType == 2){
+
+            
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
-                printf("Estem en mode /find\n");
-
-                //argv[3]
+                int bytes = EXT_findFile(argv[3], fdFitxer, superblock);
+                if(bytes < 0){
+                    printf("\nError. Fitxer no trobat.\n\n");
+                }else{
+                    printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                }
             }
             
         }

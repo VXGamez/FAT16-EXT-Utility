@@ -59,3 +59,12 @@ void SYS_fileNotFound(int fdFile, int opType){
     
     close(fdFile);
 }
+
+void SYS_removeExtension(char* file){
+    for(int i=0; file[i]!='\0' ;i++){
+        if(file[i]=='.'){
+            file[i]='\0';
+            break;
+        }
+    }
+}

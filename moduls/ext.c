@@ -65,3 +65,61 @@ void EXT_printSuperblock(SB* superblock){
     printf("Ultim muntatge: %s",muntatge_string);              
     printf("Ultima escriptura: %s\n\n",escriptura_string);  
 }
+
+
+int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
+
+    inodo ino = EXT_trobaInode(fdVolum, sb, sb->s_first_ino);
+
+    int byt=-1;
+
+    uint16_t prevLen = 0;
+    lseek(fdVolum, 1024*(ino.i_block[0]-1)+24+prevLen, SEEK_SET);
+    int final = 0;
+    ino_block blockActual;
+    SYS_removeExtension(fitxer);
+    for(int i=0; !final ;i++){
+
+        pread(fdVolum, &blockActual, sizeof(ino_block), 1024*(ino.i_block[0]-1)+24+prevLen);
+
+        char*name = malloc(blockActual.name_len+1);
+        pread(fdVolum, name, blockActual.name_len, 1024*(ino.i_block[0]-1)+24+prevLen+sizeof(ino_block));
+        name[blockActual.name_len] = '\0';
+
+        prevLen = blockActual.rec_len;
+        if(prevLen == 0){
+            final = 1;
+        }else{
+            if(strcmp(fitxer, name)==0){
+                final = 1;
+                inodo fitxer = EXT_trobaInode(fdVolum, sb, blockActual.inode);
+                byt = fitxer.i_size;
+            }
+            free(name);
+        }
+    }
+
+    return byt;
+}
+
+
+
+inodo EXT_trobaInode(int fdVolum, SB* sb, int inode){
+
+    int num_groups = (sb->s_blocks_count + sb->s_blocks_per_group - 1 )/ sb->s_blocks_per_group;
+    GroupDescriptor* groupbuffer = malloc(sizeof(GroupDescriptor)*num_groups);
+    int block_size = 1024 << sb->s_log_block_size;
+
+    lseek(fdVolum, (sb->s_first_data_block+1)*block_size, SEEK_SET);
+    read(fdVolum, groupbuffer, num_groups*sizeof(GroupDescriptor));
+
+    int block_group = (inode - 1) / sb->s_inodes_per_group;
+    int index = (inode - 1) % sb->s_inodes_per_group;
+    int offset = index*sb->s_inode_size;
+    int group_table =  groupbuffer[block_group].bg_inode_table + block_group*sb->s_blocks_per_group;
+    free(groupbuffer);
+    inodo ino;
+    pread(fdVolum, &ino, sizeof(inodo), (group_table*block_size)+offset);
+    return ino;
+
+}
