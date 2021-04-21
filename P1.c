@@ -53,6 +53,7 @@ int main(int argc, char*argv[]){
 
             }
         }else if(operationType == 2){
+
             
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
@@ -63,7 +64,6 @@ int main(int argc, char*argv[]){
                 }else{
                     printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
                 }
-                
             }
             
         }
