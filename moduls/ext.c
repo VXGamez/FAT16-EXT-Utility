@@ -69,6 +69,42 @@ void EXT_printSuperblock(SB* superblock){
 
 int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
 
+    inodo ino = EXT_trobaInode(fdVolum, sb, sb->s_first_ino);
+
+    int byt=-1;
+
+    uint16_t prevLen = 0;
+    lseek(fdVolum, 1024*(ino.i_block[0]-1)+24+prevLen, SEEK_SET);
+    int final = 0;
+    ino_block blockActual;
+    SYS_removeExtension(fitxer);
+    for(int i=0; !final ;i++){
+
+        pread(fdVolum, &blockActual, sizeof(ino_block), 1024*(ino.i_block[0]-1)+24+prevLen);
+
+        char*name = malloc(blockActual.name_len+1);
+        pread(fdVolum, name, blockActual.name_len, 1024*(ino.i_block[0]-1)+24+prevLen+sizeof(ino_block));
+        name[blockActual.name_len] = '\0';
+
+        prevLen = blockActual.rec_len;
+        if(prevLen == 0){
+            final = 1;
+        }else{
+            if(strcmp(fitxer, name)==0){
+                final = 1;
+                inodo fitxer = EXT_trobaInode(fdVolum, sb, blockActual.inode);
+                byt = fitxer.i_size;
+            }
+            free(name);
+        }
+    }
+
+    return byt;
+}
+
+
+
+inodo EXT_trobaInode(int fdVolum, SB* sb, int inode){
 
     int num_groups = (sb->s_blocks_count + sb->s_blocks_per_group - 1 )/ sb->s_blocks_per_group;
     GroupDescriptor* groupbuffer = malloc(sizeof(GroupDescriptor)*num_groups);
@@ -77,82 +113,13 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
     lseek(fdVolum, (sb->s_first_data_block+1)*block_size, SEEK_SET);
     read(fdVolum, groupbuffer, num_groups*sizeof(GroupDescriptor));
 
-    int block_group = (sb->s_first_ino - 1) / sb->s_inodes_per_group;
-    int index = (sb->s_first_ino - 1) % sb->s_inodes_per_group;
+    int block_group = (inode - 1) / sb->s_inodes_per_group;
+    int index = (inode - 1) % sb->s_inodes_per_group;
     int offset = index*sb->s_inode_size;
     int group_table =  groupbuffer[block_group].bg_inode_table + block_group*sb->s_blocks_per_group;
-
+    free(groupbuffer);
     inodo ino;
     pread(fdVolum, &ino, sizeof(inodo), (group_table*block_size)+offset);
+    return ino;
 
-    char kk;
-    printf("Enter per continuar: ");
-    scanf("%c", &kk);
-
-    /*lseek(fdVolum, 208920, SEEK_SET);
-    ino_block blockActual;
-    read(fdVolum, &blockActual, sizeof(ino_block));
-    char*name = malloc(blockActual.name_len+1);
-    read(fdVolum, name, blockActual.name_len);
-
-    name[blockActual.name_len] = '\0';
-    printf("Inode: %d\n", blockActual.inode);
-    printf("Rec_Len: %d\n", blockActual.rec_len);
-    printf("Name_len: %d\n", blockActual.name_len);
-    printf("file_type: %hhu\n", blockActual.file_type);
-    printf("Name del fitxer: %s\n", name);
-    free(name);*/
-    /*uint16_t prevLen = 0;
-    for(int i=0; i<13 ;i++){
-
-        printf("La adreça del block %d és: %08" PRIx32 "\n", (ino.i_block[i]-1), 1024*(ino.i_block[i]-1)+16*(i+2)-6);
-        //208920
-        ino_block blockActual;
-        pread(fdVolum, &blockActual, sizeof(ino_block), 1024*(ino.i_block[i]-1)+16*(i+2)-6);
-
-        char*name = malloc(blockActual.name_len+1);
-        pread(fdVolum, name, blockActual.name_len, 1024*(ino.i_block[i]-1)+16*(i+2)-6+sizeof(ino_block)+prevLen);
-        //208944
-        name[blockActual.name_len] = '\0';
-        printf("Inode: %d\n", blockActual.inode);
-        printf("Rec_Len: %d\n", blockActual.rec_len);
-        printf("Name_len: %d\n", blockActual.name_len);
-        printf("file_type: %hhu\n", blockActual.file_type);
-        printf("Name del fitxer: %s\n", name);
-        prevLen = blockActual.rec_len;
-        free(name);
-
-    }*/
-
-    lseek(fdVolum, 208920, SEEK_SET);
-    uint16_t prevLen = 0;
-    int final = 0;
-    ino_block blockActual;
-    for(int i=0; !final ;i++){
-
-
-        printf("Current offset: %d\n", 1024*(ino.i_block[0]-1)+24+prevLen);
-
-        pread(fdVolum, &blockActual, sizeof(ino_block), 1024*(ino.i_block[0]-1)+24+prevLen);
-
-        char*name = malloc(blockActual.name_len+1);
-        pread(fdVolum, name, blockActual.name_len, 1024*(ino.i_block[0]-1)+24+prevLen+sizeof(ino_block));
-        name[blockActual.name_len] = '\0';
-
-        printf("Inode: %d\n", blockActual.inode);
-        printf("Rec_Len: %d\n", blockActual.rec_len);
-        printf("Name_len: %d\n", blockActual.name_len);
-        printf("file_type: %hhu\n", blockActual.file_type);
-        printf("Name del fitxer: %s\n", name);
-        free(name);
-
-        prevLen = blockActual.rec_len;
-        if(prevLen == 0){
-            final = 1;
-        }
-
-    }
-
-
-    return 0;
 }
