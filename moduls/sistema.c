@@ -36,11 +36,30 @@ int SYS_getSystemType(int fdFitxer, SB **superblock, BootSector **bs){
         }else{
             lseek(fdFitxer, 0, SEEK_SET);
             *bs = malloc(sizeof(BootSector));
-            bytes = read(fdFitxer, *bs, sizeof(BootSector));
+            read(fdFitxer, (*bs)->BS_jmpBoot, 3);
+            read(fdFitxer, (*bs)->BS_OEMName, 8);
+            read(fdFitxer, &(*bs)->BPB_BytsPerSec, 2);
+            read(fdFitxer, &(*bs)->BPB_SecPerClus, 1);
+            read(fdFitxer, &(*bs)->BPB_RsvdSecCnt, 2);
+            read(fdFitxer, &(*bs)->BPB_NumFATs, 1);
+            read(fdFitxer, &(*bs)->BPB_RootEntCnt, 2);
+            read(fdFitxer, &(*bs)->BPB_TotSec16, 2);
+            read(fdFitxer, &(*bs)->BPB_Media, 1);
+            read(fdFitxer, &(*bs)->BPB_FATSz16, 2);
+            read(fdFitxer, &(*bs)->BPB_SecPerTrk, 2);
+            read(fdFitxer, &(*bs)->BPB_NumHeads, 2);
+            read(fdFitxer, &(*bs)->BPB_HiddSec, 4);
+            read(fdFitxer, &(*bs)->BPB_TotSec32, 4);
+            read(fdFitxer, &(*bs)->BS_DrvNum, 1);
+            read(fdFitxer, &(*bs)->BS_Reserved1, 1);
+            read(fdFitxer, &(*bs)->BS_BootSig, 1);
+            read(fdFitxer, (*bs)->BS_VolLab, 11);
+            read(fdFitxer, (*bs)->BS_FilSysType, 8);
 
             if(FAT_checkIfFat16(*bs)){
                 systemType=2;
             }
+
         }  
         return systemType;
 }

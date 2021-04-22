@@ -37,7 +37,6 @@ int main(int argc, char*argv[]){
         systemType = SYS_getSystemType(fdFitxer, &superblock, &bs);
 
         if(operationType == 1){
-            printf("Entro primer if\n");
             switch(systemType){
                 case 1:
                     printf("\nFilesystem: EXT2\n");

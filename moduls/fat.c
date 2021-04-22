@@ -17,7 +17,7 @@ int FAT_checkIfFat16(BootSector *bs){
         TotSec = bs->BPB_TotSec32;
     }
 
-    dataSec = -1*(TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
+    dataSec = (TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
     countOfClusters = dataSec / bs->BPB_SecPerClus;  
     /*
     printf("DATASEC: %d\n", dataSec);
@@ -67,16 +67,21 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs){
     //uint16_t fat_offset = partition->offset * 512 + (uint32_t) bs->BPB_RsvdSecCnt * bs->BPB_BytsPerSec;
 
     //uint16_t root_dir_offset = fat_offset + (uint32_t) bs->BPB_NumFATs * bs->BPB_FATSz16 * bs->BPB_BytsPerSec;
-
-    lseek(fdFitxer, bs->BPB_BytsPerSec*bs->BPB_SecPerClus*4 ,SEEK_SET);
-
+    long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
+    lseek(fdFitxer, (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec ,SEEK_SET);
+    printf("Longitud: %ld\n", ll);
+    char kk;
+    scanf("%c", &kk);
     dir_entry de;
-    for(int i=0; i<(bs->BPB_BytsPerSec*bs->BPB_SecPerClus)%sizeof(dir_entry) ;i++){
+    for(int i=0; i<(bs->BPB_RootEntCnt*32)/(bs->BPB_BytsPerSec) ;i++){
         read(fdFitxer, &de, sizeof(dir_entry));
-        printf("name: %s\n", de.long_name);
-        printf("extension: %s\n", de.extension);
-        printf("fileAttr: %d\n", de.fileAttr);
-        printf("fSize: %d\n", de.fSize);
+        if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
+            printf("name: %s\n", de.long_name);
+            printf("extension: %s\n", de.extension);
+            printf("fileAttr: %d\n", de.fileAttr);
+            printf("fSize: %d\n", de.fSize);
+        }
+
     }
 
 
