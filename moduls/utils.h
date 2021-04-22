@@ -103,13 +103,14 @@ typedef struct {
 }BootSector;
 
 typedef struct {
-    char long_name[32];                    //The file's name, truncated to 31 characters.
-    uint8_t attributes;                    //The file's attributes. Mask of the FAT16_ATTRIB_* constants.
-    /** The time the file was last modified. */
-    //uint16_t modified_time;
-    uint16_t cluster;                       //The cluster in which the file's first byte resides.
-    uint32_t file_size;                     //The file's size
-    uint32_t entry_offset;                  //The total disk offset of this directory entry.
+    char long_name[8];                    //The file's name, truncated to 31 characters.
+    char extension[3];                    //The file's attributes. Mask of the FAT16_ATTRIB_* constants.
+    uint8_t fileAttr;
+    uint8_t reserved[10];
+    uint16_t tChange;
+    uint16_t dChange;
+    uint16_t firstCluster;
+    uint32_t fSize;
 }dir_entry;
 
 typedef struct{

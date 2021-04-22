@@ -58,7 +58,7 @@ int main(int argc, char*argv[]){
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
-                SYS_removeExtension(fitxer);
+                SYS_removeExtension(argv[3]);
                 switch(systemType){
                     case 1:
                         bytes = EXT_findFile(argv[3], fdFitxer, superblock);

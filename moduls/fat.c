@@ -64,5 +64,23 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs){
 
 
 
+    //uint16_t fat_offset = partition->offset * 512 + (uint32_t) bs->BPB_RsvdSecCnt * bs->BPB_BytsPerSec;
+
+    //uint16_t root_dir_offset = fat_offset + (uint32_t) bs->BPB_NumFATs * bs->BPB_FATSz16 * bs->BPB_BytsPerSec;
+
+    lseek(fdFitxer, bs->BPB_BytsPerSec*bs->BPB_SecPerClus*4 ,SEEK_SET);
+
+    dir_entry de;
+    for(int i=0; i<(bs->BPB_BytsPerSec*bs->BPB_SecPerClus)%sizeof(dir_entry) ;i++){
+        read(fdFitxer, &de, sizeof(dir_entry));
+        printf("name: %s\n", de.long_name);
+        printf("extension: %s\n", de.extension);
+        printf("fileAttr: %d\n", de.fileAttr);
+        printf("fSize: %d\n", de.fSize);
+    }
+
+
+
+
     return 0;
 }
