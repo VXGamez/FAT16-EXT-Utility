@@ -17,15 +17,9 @@ int FAT_checkIfFat16(BootSector *bs){
         TotSec = bs->BPB_TotSec32;
     }
 
-    dataSec = -1*(TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
+    dataSec = (TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
     countOfClusters = dataSec / bs->BPB_SecPerClus;  
-    /*
-    printf("DATASEC: %d\n", dataSec);
-    printf("%hu - (%u + %u * %hu) + ((%hu * 32) + (%hu - 1)) / %hu )\n", TotSec, bs->BPB_RsvdSecCnt, bs->BPB_NumFATs, FATSz, bs->BPB_RootEntCnt, bs->BPB_BytsPerSec, bs->BPB_BytsPerSec);
-    
-    printf("\nCount of Clusters: %d\n", countOfClusters);
-    printf("%d / %u\n\n", dataSec,bs->BPB_SecPerClus);
-    */
+
     if(countOfClusters < 4085) {
        return 0;
     } else if(countOfClusters < 65525) {
@@ -58,4 +52,27 @@ void FAT_printBootSector(BootSector *bs){
     printf("Sectors per FAT: %hu\n", bs->BPB_FATSz16);
     char* token = SYS_cleanLabel(bs->BS_VolLab);
     printf("Label: %s\n\n\n", token);
+}
+
+int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext){
+
+    long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
+    lseek(fdFitxer, (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec ,SEEK_SET);
+
+    int bytes=-1;
+
+    dir_entry de;
+    for(int i=0; i<(bs->BPB_RootEntCnt*32)/(bs->BPB_BytsPerSec) ;i++){
+        read(fdFitxer, &de, sizeof(dir_entry));
+        SYS_clearFATvalue(de.long_name, 8);
+        SYS_clearFATvalue(de.extension, 3);
+        if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
+            if(strcmp(de.long_name, fitxer)==0 && strcmp(de.extension, ext)==0){
+                bytes = de.fSize;
+            }
+        }
+    }
+
+
+    return bytes;
 }

@@ -77,7 +77,6 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
     lseek(fdVolum, 1024*(ino.i_block[0]-1)+24+prevLen, SEEK_SET);
     int final = 0;
     ino_block blockActual;
-    SYS_removeExtension(fitxer);
     for(int i=0; !final ;i++){
 
         pread(fdVolum, &blockActual, sizeof(ino_block), 1024*(ino.i_block[0]-1)+24+prevLen);

@@ -36,8 +36,11 @@
 #define SUPERBLOCK_START 1024
 #define GROUP_DESCRIPTORS_SIZE 32
 #define ACCEPTED_OPERATIONS 2
+#define ACCEPTED_EXTENSIONS 9
 
 static const char acceptedOperations[2][20] = {"/info", "/find"};
+static const char acceptedExtensions[9][20] = {"dat", "bin", "h", "c", "txt", "jpg", "png", "zip", "hex"};
+
 
 typedef struct {
   uint32_t s_inodes_count;      // Total number of inodes
@@ -97,10 +100,21 @@ typedef struct {
     unsigned char BS_DrvNum;          //Drive Number
     unsigned char BS_Reserved1;       //Reserved
     unsigned char BS_BootSig;         //Extended Boot Signatura
-    //int BS_VolID;                     //Volume Serial Number
+    //int BS_VolID;                   //Volume Serial Number
     char BS_VolLab[11];               //Volume Label
     char BS_FilSysType[8];            //File System Type
 }BootSector;
+
+typedef struct {
+    char long_name[8];                    //The file's name, truncated to 31 characters.
+    char extension[3];                    //The file's attributes. Mask of the FAT16_ATTRIB_* constants.
+    uint8_t fileAttr;
+    uint8_t reserved[10];
+    uint16_t tChange;
+    uint16_t dChange;
+    uint16_t firstCluster;
+    uint32_t fSize;
+}dir_entry;
 
 typedef struct{
     uint32_t bg_block_bitmap;
