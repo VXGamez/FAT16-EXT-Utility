@@ -25,6 +25,39 @@ int SYS_checkOperation(char* operation){
     return op;
 }
 
+int SYS_checkExtension(char* extensions){
+    int op=0;
+    for(int i=0; i<ACCEPTED_EXTENSIONS ;i++){
+        if(strcmp(extensions, acceptedExtensions[i]) == 0){
+            op = i+1;
+        }
+    }
+    return op;
+}
+
+char* SYS_getExtension(char* file){
+    int found=0, len=0;
+    char* extension;
+    for(int i=0; file[i]!='\0' ;i++){
+        if(found){
+            extension = realloc(extension, len+2);
+            extension[len] = file[i];
+            len++;
+        }else if(file[i]=='.'){
+            i++;
+            found = 1;
+            len=0;
+            extension = (char*)malloc(sizeof(char)*2);
+            extension[len] = file[i];
+            len++;
+        }
+    }
+    if(found){
+        extension[len] = '\0';
+    }
+    return extension;
+}
+
 int SYS_getSystemType(int fdFitxer, SB **superblock, BootSector **bs){
         int systemType = 0;
         lseek(fdFitxer, SUPERBLOCK_START, SEEK_SET);
@@ -85,5 +118,25 @@ void SYS_removeExtension(char* file){
             file[i]='\0';
             break;
         }
+    }
+}
+
+void SYS_clearFATvalue(char *name, int limit){
+    int i;
+    for(i=0; i<limit && name[i]!='\0' ;i++){
+        if(name[i]==' '){
+            name[i]='\0';
+            break;
+        }
+    }
+    name[i]='\0';
+    SYS_toLower(name);
+}
+
+void SYS_toLower(char* str) {
+    int i;
+    for(i=0;i<=strlen(str);i++){
+        if(str[i]>=65&&str[i]<=90)
+            str[i]=str[i]+32;
     }
 }

@@ -36,8 +36,11 @@
 #define SUPERBLOCK_START 1024
 #define GROUP_DESCRIPTORS_SIZE 32
 #define ACCEPTED_OPERATIONS 2
+#define ACCEPTED_EXTENSIONS 9
 
 static const char acceptedOperations[2][20] = {"/info", "/find"};
+static const char acceptedExtensions[9][20] = {"dat", "bin", "h", "c", "txt", "jpg", "png", "zip", "hex"};
+
 
 typedef struct {
   uint32_t s_inodes_count;      // Total number of inodes

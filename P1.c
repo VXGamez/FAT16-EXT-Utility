@@ -57,6 +57,11 @@ int main(int argc, char*argv[]){
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
+                char* extension = SYS_getExtension(argv[3]);
+                if(SYS_checkExtension(extension)==0){
+                    printf("Error. Extensió no vàlida.\n");
+                    return 0;
+                }
                 SYS_removeExtension(argv[3]);
                 switch(systemType){
                     case 1:
@@ -69,7 +74,7 @@ int main(int argc, char*argv[]){
                         break;
                     case 2:
                         printf("\nFilesystem: FAT16\n");
-                        bytes = FAT_findFile(argv[3], fdFitxer, bs);
+                        bytes = FAT_findFile(argv[3], fdFitxer, bs, extension);
                         if(bytes < 0){
                             printf("\nError. Fitxer no trobat.\n\n");
                         }else{

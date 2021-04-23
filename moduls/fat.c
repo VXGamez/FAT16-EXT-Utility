@@ -19,13 +19,7 @@ int FAT_checkIfFat16(BootSector *bs){
 
     dataSec = (TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
     countOfClusters = dataSec / bs->BPB_SecPerClus;  
-    /*
-    printf("DATASEC: %d\n", dataSec);
-    printf("%hu - (%u + %u * %hu) + ((%hu * 32) + (%hu - 1)) / %hu )\n", TotSec, bs->BPB_RsvdSecCnt, bs->BPB_NumFATs, FATSz, bs->BPB_RootEntCnt, bs->BPB_BytsPerSec, bs->BPB_BytsPerSec);
-    
-    printf("\nCount of Clusters: %d\n", countOfClusters);
-    printf("%d / %u\n\n", dataSec,bs->BPB_SecPerClus);
-    */
+
     if(countOfClusters < 4085) {
        return 0;
     } else if(countOfClusters < 65525) {
@@ -60,32 +54,25 @@ void FAT_printBootSector(BootSector *bs){
     printf("Label: %s\n\n\n", token);
 }
 
-int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs){
+int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext){
 
-
-
-    //uint16_t fat_offset = partition->offset * 512 + (uint32_t) bs->BPB_RsvdSecCnt * bs->BPB_BytsPerSec;
-
-    //uint16_t root_dir_offset = fat_offset + (uint32_t) bs->BPB_NumFATs * bs->BPB_FATSz16 * bs->BPB_BytsPerSec;
     long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
     lseek(fdFitxer, (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec ,SEEK_SET);
-    printf("Longitud: %ld\n", ll);
-    char kk;
-    scanf("%c", &kk);
+
+    int bytes=-1;
+
     dir_entry de;
     for(int i=0; i<(bs->BPB_RootEntCnt*32)/(bs->BPB_BytsPerSec) ;i++){
         read(fdFitxer, &de, sizeof(dir_entry));
+        SYS_clearFATvalue(de.long_name, 8);
+        SYS_clearFATvalue(de.extension, 3);
         if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
-            printf("name: %s\n", de.long_name);
-            printf("extension: %s\n", de.extension);
-            printf("fileAttr: %d\n", de.fileAttr);
-            printf("fSize: %d\n", de.fSize);
+            if(strcmp(de.long_name, fitxer)==0 && strcmp(de.extension, ext)==0){
+                bytes = de.fSize;
+            }
         }
-
     }
 
 
-
-
-    return 0;
+    return bytes;
 }
