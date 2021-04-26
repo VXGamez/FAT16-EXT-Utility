@@ -94,9 +94,11 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
                 }else{
                     if(strcmp(fitxer, name)==0 && blockActual.file_type == 1){
                         inner = 1;
-                        inodo fitxer = EXT_trobaInode(fdVolum, sb, blockActual.inode);
-                        byt = fitxer.i_size;
                         totalLen = ino.i_size + 1000;
+
+                        inodo ff = EXT_trobaInode(fdVolum, sb, blockActual.inode);
+                        byt = ff.i_size;
+
                     }else if(strcmp(fitxer, name)==0 && blockActual.file_type == 2){
                         byt = -2;
                     }

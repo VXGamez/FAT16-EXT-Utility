@@ -58,7 +58,7 @@ int main(int argc, char*argv[]){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
                 char* extension = SYS_getExtension(argv[3]);
-                if(SYS_checkExtension(extension)==0){
+                if(strlen(extension)>0 &&  SYS_checkExtension(extension)==0){
                     printf("Error. Extensió no vàlida.\n");
                     return 0;
                 }
