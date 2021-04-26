@@ -67,7 +67,11 @@ int main(int argc, char*argv[]){
                     case 1:
                         bytes = EXT_findFile(argv[3], fdFitxer, superblock);
                         if(bytes < 0){
-                            printf("\nError. Fitxer no trobat.\n\n");
+                            if(bytes == -2){
+                                printf("\nError. Fitxer no trobat però sí un directori pel mateix nom.\n\n");
+                            }else{
+                                printf("\nError. Fitxer no trobat.\n\n");
+                            }
                         }else{
                             printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
                         }

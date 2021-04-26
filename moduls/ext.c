@@ -69,32 +69,45 @@ void EXT_printSuperblock(SB* superblock){
 
 int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
 
-    inodo ino = EXT_trobaInode(fdVolum, sb, sb->s_first_ino);
-
+    inodo ino = EXT_trobaInode(fdVolum, sb, 2);
     int byt=-1;
-
     uint16_t prevLen = 0;
-    lseek(fdVolum, 1024*(ino.i_block[0]-1)+24+prevLen, SEEK_SET);
-    int final = 0;
+    int block_size = 1024 << sb->s_log_block_size;
+    int totalLen=0;
+    int inner= 0;
     ino_block blockActual;
-    for(int i=0; !final ;i++){
+    for(int j=0; totalLen<ino.i_size ;j++){
+        inner = 0;
+        prevLen = 0;
+        lseek(fdVolum, block_size + block_size*(ino.i_block[j]-1)+totalLen, SEEK_SET);
+        while(!inner){
+            pread(fdVolum, &blockActual, sizeof(ino_block), block_size + block_size*(ino.i_block[j]-1)+totalLen);
+            char*name=NULL;
+            if(blockActual.name_len>0){
+                name = malloc(blockActual.name_len+1);
+                pread(fdVolum, name, blockActual.name_len, block_size + block_size*(ino.i_block[j]-1)+totalLen+sizeof(ino_block));
+                name[blockActual.name_len] = '\0';
+                prevLen = blockActual.rec_len;
+                totalLen = totalLen + prevLen;
+                if(prevLen == 0 || totalLen>=ino.i_size){
+                    inner = 1;
+                }else{
+                    if(strcmp(fitxer, name)==0 && blockActual.file_type == 1){
+                        inner = 1;
+                        inodo fitxer = EXT_trobaInode(fdVolum, sb, blockActual.inode);
+                        byt = fitxer.i_size;
+                        totalLen = ino.i_size + 1000;
+                    }else if(strcmp(fitxer, name)==0 && blockActual.file_type == 2){
+                        byt = -2;
+                    }
+                }
 
-        pread(fdVolum, &blockActual, sizeof(ino_block), 1024*(ino.i_block[0]-1)+24+prevLen);
-
-        char*name = malloc(blockActual.name_len+1);
-        pread(fdVolum, name, blockActual.name_len, 1024*(ino.i_block[0]-1)+24+prevLen+sizeof(ino_block));
-        name[blockActual.name_len] = '\0';
-
-        prevLen = blockActual.rec_len;
-        if(prevLen == 0){
-            final = 1;
-        }else{
-            if(strcmp(fitxer, name)==0){
-                final = 1;
-                inodo fitxer = EXT_trobaInode(fdVolum, sb, blockActual.inode);
-                byt = fitxer.i_size;
+            }else{
+                inner=1;
             }
-            free(name);
+            if(name!=NULL){
+                free(name);
+            }
         }
     }
 
@@ -105,18 +118,15 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
 
 inodo EXT_trobaInode(int fdVolum, SB* sb, int inode){
 
-    int num_groups = (sb->s_blocks_count + sb->s_blocks_per_group - 1 )/ sb->s_blocks_per_group;
-    GroupDescriptor* groupbuffer = malloc(sizeof(GroupDescriptor)*num_groups);
+    GroupDescriptor groupbuffer;
+
     int block_size = 1024 << sb->s_log_block_size;
-
     lseek(fdVolum, (sb->s_first_data_block+1)*block_size, SEEK_SET);
-    read(fdVolum, groupbuffer, num_groups*sizeof(GroupDescriptor));
-
+    read(fdVolum, &groupbuffer, sizeof(GroupDescriptor));
     int block_group = (inode - 1) / sb->s_inodes_per_group;
     int index = (inode - 1) % sb->s_inodes_per_group;
     int offset = index*sb->s_inode_size;
-    int group_table =  groupbuffer[block_group].bg_inode_table + block_group*sb->s_blocks_per_group;
-    free(groupbuffer);
+    int group_table =  groupbuffer.bg_inode_table + block_group * sb->s_blocks_per_group;
     inodo ino;
     pread(fdVolum, &ino, sizeof(inodo), (group_table*block_size)+offset);
     return ino;
