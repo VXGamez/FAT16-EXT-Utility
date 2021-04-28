@@ -29,14 +29,14 @@ int main(int argc, char*argv[]){
             return 0;
         }
 
-        write(1, TITLE, strlen(TITLE));
-        
+
         SB *superblock;
         BootSector *bs;
 
         systemType = SYS_getSystemType(fdFitxer, &superblock, &bs);
 
         if(operationType == 1){
+            write(1, TITLE, strlen(TITLE));
             switch(systemType){
                 case 1:
                     printf("\nFilesystem: EXT2\n");
@@ -77,7 +77,6 @@ int main(int argc, char*argv[]){
                         }
                         break;
                     case 2:
-                        printf("\nFilesystem: FAT16\n");
                         bytes = FAT_findFile(argv[3], fdFitxer, bs, extension);
                         if(bytes < 0){
                             printf("\nError. Fitxer no trobat.\n\n");
