@@ -10,7 +10,7 @@ int FAT_checkIfFat16(BootSector *bs){
     }else{
         return 0;
     }
-        
+
     if(bs->BPB_TotSec16 != 0){
         TotSec = bs->BPB_TotSec16;
     }else{
@@ -18,7 +18,7 @@ int FAT_checkIfFat16(BootSector *bs){
     }
 
     dataSec = (TotSec - (bs->BPB_RsvdSecCnt + (bs->BPB_NumFATs * FATSz) + (((bs->BPB_RootEntCnt * 32) + (bs->BPB_BytsPerSec - 1)) / bs->BPB_BytsPerSec) ));
-    countOfClusters = dataSec / bs->BPB_SecPerClus;  
+    countOfClusters = dataSec / bs->BPB_SecPerClus;
 
     if(countOfClusters < 4085) {
        return 0;
@@ -56,7 +56,7 @@ void FAT_printBootSector(BootSector *bs){
 
 int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext){
 
-    long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
+    //long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
     lseek(fdFitxer, (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec ,SEEK_SET);
 
     int bytes=-1;

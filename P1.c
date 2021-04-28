@@ -3,6 +3,22 @@
 #include "moduls/fat.h"
 
 
+int fdFitxer=-1;
+SB *superblock=NULL;
+BootSector *bs=NULL;
+
+void freeMem(){
+  if(fdFitxer>0){
+    close(fdFitxer);
+  }
+  if(bs!=NULL){
+      free(bs);
+  }
+  if(superblock!=NULL){
+      free(superblock);
+  }
+}
+
 int main(int argc, char*argv[]){
     int systemType=0;
     int operationType=0;
@@ -23,15 +39,13 @@ int main(int argc, char*argv[]){
             }
         }
 
-        int fdFitxer = open(SYS_fileInDirectory("fitxers", argv[2]), O_RDONLY);
+        fdFitxer = open(SYS_fileInDirectory("fitxers", argv[2]), O_RDONLY);
         if(fdFitxer<0){
             SYS_fileNotFound(fdFitxer,operationType);
+            freeMem();
             return 0;
         }
 
-
-        SB *superblock;
-        BootSector *bs;
 
         systemType = SYS_getSystemType(fdFitxer, &superblock, &bs);
 
@@ -44,7 +58,7 @@ int main(int argc, char*argv[]){
                     break;
                 case 2:
                     printf("\nFilesystem: FAT16\n");
-                    FAT_printBootSector(bs);                    
+                    FAT_printBootSector(bs);
                     break;
                 default:
                     write(1, ERR_NO_ES_FORMAT_VALID, strlen(ERR_NO_ES_FORMAT_VALID));
@@ -53,13 +67,14 @@ int main(int argc, char*argv[]){
             }
         }else if(operationType == 2){
             int bytes;
-            
+
             if(systemType!=2 && systemType!=1){
                 write(1, ERR_NO_ES_FORMAT_VALID_FIND, strlen(ERR_NO_ES_FORMAT_VALID_FIND));
             }else{
                 char* extension = SYS_getExtension(argv[3]);
                 if(strlen(extension)>0 &&  SYS_checkExtension(extension)==0){
                     printf("Error. Extensió no vàlida.\n");
+                    freeMem();
                     return 0;
                 }
                 SYS_removeExtension(argv[3]);
@@ -86,15 +101,10 @@ int main(int argc, char*argv[]){
                         break;
                 }
             }
-            
-        }
-       
-        close(fdFitxer);
-        if(bs!=NULL){
-            free(bs);
-        }
-        free(superblock);
 
-       
+        }
+
+        freeMem();
+
     }
 }

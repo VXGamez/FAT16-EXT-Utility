@@ -37,7 +37,7 @@ int SYS_checkExtension(char* extensions){
 
 char* SYS_getExtension(char* file){
     int found=0, len=0;
-    char* extension;
+    char* extension=NULL;
     for(int i=0; file[i]!='\0' ;i++){
         if(found){
             extension = realloc(extension, len+2);
@@ -54,6 +54,9 @@ char* SYS_getExtension(char* file){
     }
     if(found){
         extension[len] = '\0';
+    }else if(extension==NULL){
+      extension = (char*)malloc(1);
+      extension[0] = '\0';
     }
     return extension;
 }
@@ -62,7 +65,7 @@ int SYS_getSystemType(int fdFitxer, SB **superblock, BootSector **bs){
         int systemType = 0;
         lseek(fdFitxer, SUPERBLOCK_START, SEEK_SET);
         *superblock = malloc(sizeof(SB));
-        int bytes = read(fdFitxer, *superblock, sizeof(SB));
+        read(fdFitxer, *superblock, sizeof(SB));
 
         if((*superblock)->s_magic == 0xEF53){
             systemType = 1;
@@ -93,7 +96,7 @@ int SYS_getSystemType(int fdFitxer, SB **superblock, BootSector **bs){
                 systemType=2;
             }
 
-        }  
+        }
         return systemType;
 }
 
@@ -103,12 +106,12 @@ void SYS_fileNotFound(int fdFile, int opType){
             write(1, ERR_NO_EXISTEIX, strlen(ERR_NO_EXISTEIX));
             break;
         case 2:
-            write(1, ERR_NO_FIND_EXISTEIX, strlen(ERR_NO_FIND_EXISTEIX));       
+            write(1, ERR_NO_FIND_EXISTEIX, strlen(ERR_NO_FIND_EXISTEIX));
             break;
         default:
             break;
     }
-    
+
     close(fdFile);
 }
 
