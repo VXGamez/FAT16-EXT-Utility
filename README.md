@@ -1,11 +1,16 @@
 # SOA
 
+**Per aquesta entrega no s'ha realitzat una documentació detallada com per la anterior. S'ha començat a redactar i se seguirá de cara a l'entrega final**
+
 <p align="center">
   <a href="https://github.com/VXGamez/SOA/releases/tag/FASE1">
   <img src="https://img.shields.io/badge/FASE-1-brightgreen?style=for-the-badge&logo=c">
   </a>
+<a href="https://github.com/VXGamez/SOA/releases/tag/FASE2">
+  <img src="https://img.shields.io/badge/FASE-2-brightgreen?style=for-the-badge&logo=c">
+  </a>
 </p>
-  
+
 <details open="open">
   <summary><h2 style="display: inline-block">Taula de Continguts</h2></summary>
   <ol>
@@ -42,13 +47,25 @@
    make
    ```
 3. Per executar emprar el executable p1 de la següent manera:
+   
+   **· Mode /info**
    ```sh
-   ./p1 <operacio> <nom_volum>
+   ./p1 /info <nom_volum>
    ```
+   **· Mode /find**
+   ```sh
+   ./p1 /find <nom_volum> <fitxer_a_trobar>
+   ```
+   
 
 ## Explicació dels Sistemes de Fitxers
 
-De cara a aquesta entrega se'ns ha demanat que explorem l'organització dels fitxers de dos sistemes de fitxers diferents: FAT16 i EXT. Per assolir aquesta exploració se'ns han proveït dos fitxers, un EXT i l'altre FAT16, així com una explicació detallada de com fer-ne més tot i que jo no n'he realitzat cap per aquesta entrega.
+Aquesta entrega incrementa bastant en dificultat en comparació a la anterior, a la anterior entrega se'ns demanava que comencéssim explorant els diferents sistemes de fitxers, visitant les regions de memòria on es desa la informació de cada un d’ells, el Superblock en cas del EXT i BootSector en el cas del FAT.
+
+Però aquests dos “blocs”, no son més que això, blocs al sistema de fitxers, i tenen informació d’aquest, però no dels seus continguts, això es troba en altres blocs, i en això ha consistit aquesta fase.
+
+Essencialment, en ambdós sistemes de fitxers, tenim una divisió de blocs, tot i que reben noms diferents, a EXT parlarem de Blocs mentre que a FAT parlarem de Clusters, format per diferents Sectors. En el cas de EXT tenim un sistema de inodes, aquests funcionen d’una manera molt senzilla. En EXT tenim els fitxers, o més aviat les dades, agrupades per regions de memòria, i un inode no es més que un “índex” que ens senyala on son totes aquestes regions de memòria pel que un inode no “conté” els fitxers sinó que hi apunta però sí conté dades
+
 
 ### FAT16
 
@@ -72,7 +89,7 @@ Els sistemes de fitxers ampliats (Extended Filesystems - EXT) es troben a moltes
 
 Un sistema de fitxers EXT es divideix en una sèrie de grups de blocs. Per reduir les dificultats de rendiment a causa de la fragmentació, l'assignació de blocs s'esforça molt per mantenir els blocs de cada fitxer dins del mateix grup, reduint així els temps de cerca. La mida d’un grup de blocs s’especifica als blocs superblock.s_blocks_per_group, tot i que també es pot calcular com a 8 * block_size_in_bytes. Amb la mida de bloc predeterminada de 4KiB, cada grup contindrà 32.768 blocs, per a una longitud de 128 MB. El nombre de grups de blocs és la mida del dispositiu dividida per la mida d’un grup de blocs.
 
-Per al cas especial del grup de blocs 0 (superblock) , els primers 1024 bytes no s’utilitzen d'aquesta manera el superblock començarà amb un desplaçament de 1024 bytes, sigui el bloc que sigui (normalment 0). 
+Per al cas especial del grup de blocs 0 (superblock) , els primers 1024 bytes no s’utilitzen d'aquesta manera el superblock començarà amb un desplaçament de 1024 bytes, sigui el bloc que sigui (normalment 0).
 
 El controlador ext4 funciona principalment amb el superblock i els descriptors de grups que es troben al grup de blocs 0. La ubicació de la taula d’inodes ve donada per bg_inode_table. És un rang continu de blocs prou gran com per contenir s_inodes_per_group * sb.s_inode_size bytes.
 
@@ -88,7 +105,7 @@ De cara a executar aquesta pràctica crec només hi ha un parell de requeriments
 
 Pel que fa al disseny d'aquesta primera fase ha estat molt senzill. Tot i que el enunciat ho especifica, encara no he emprat disseny modular ja que no m'ha calgut ni li he vist una utilitat per aquesta primera fase. Més endevant sí dividiré les funcions d'utilitat per mòduls, però de cara a aquesta primera entrega no m'ha fet falta.
 
-De cara al funcionament, ha estat senzill. Inicialment tenia intenció de desplaçar el cursor del fitxer binari a les posicions indicades pels documents de teoria i anar fent lectures dels tamanys indicats, però me'n vaig adonar bastant dora de que això suposaria un volum de codi elevat i no era gaire òptim estar pujant i baixant el cursor cada cop per cuadrar adequadament els offsets. És per això que el que he fet ha estat declarar dues estructures, una per el sistema de fitxers EXT i l'altre pel sistema de fitxers FAT12, i assegurar-me de que aquestes estructures tenen el tamany, i tamany de variables adequat per realitzar la lectura de la taula de cop, amb un sol read. 
+De cara al funcionament, ha estat senzill. Inicialment tenia intenció de desplaçar el cursor del fitxer binari a les posicions indicades pels documents de teoria i anar fent lectures dels tamanys indicats, però me'n vaig adonar bastant dora de que això suposaria un volum de codi elevat i no era gaire òptim estar pujant i baixant el cursor cada cop per cuadrar adequadament els offsets. És per això que el que he fet ha estat declarar dues estructures, una per el sistema de fitxers EXT i l'altre pel sistema de fitxers FAT12, i assegurar-me de que aquestes estructures tenen el tamany, i tamany de variables adequat per realitzar la lectura de la taula de cop, amb un sol read.
 
 És per això que puc dir que la meva pràctica funciona realitzant una simple lectura desde el offset 1024, en cas que el nombre s_magic de la estuctura no sigui equivalent a 0xEF53, considerem que no és EXT, pel que torno a desplaçar el cursor del fitxer binari a la posició desitjada per FAT12, i realitzo la lectura però aquest cop de la estructura del BootSector. A continuació realitzo la comprovació del número de clusters, i si aquesta és satisfactòria sabré que es tracta de un sistema FAT12, sinó, aviso al usuari mitjançant un missatge per pantalla.
 
@@ -97,15 +114,15 @@ De cara al funcionament, ha estat senzill. Inicialment tenia intenció de despla
 Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una sola lectura desant-se completament a les estrucutres, pel que he hagut de declarar totes les variables necessàries per poder contenir la taula sencera, ja sigui la del Boot Sector del sistema FAT12 o la del Superblock de EXT.
 
    ```c
-    typedef struct {
+   typedef struct {
       uint32_t s_inodes_count;      
       uint32_t s_blocks_count;      
       uint32_t s_r_blocks_count;    
-      uint32_t s_free_blocks_count; 
-      uint32_t s_free_inodes_count; 
+      uint32_t s_free_blocks_count;
+      uint32_t s_free_inodes_count;
       uint32_t s_first_data_block;  
       uint32_t s_log_block_size;    
-      int32_t  s_log_frag_size;    
+      int32_t  s_log_frag_size;     
       uint32_t s_blocks_per_group;  
       uint32_t s_frags_per_group;   
       uint32_t s_inodes_per_group;  
@@ -123,40 +140,90 @@ Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una 
       uint32_t s_rev_level;         
       uint16_t s_def_resuid;        
       uint16_t s_def_resgid;        
+
       uint32_t s_first_ino;         
       uint16_t s_inode_size;        
       uint16_t s_block_group_nr;    
       uint32_t s_feature_compat;    
       uint32_t s_feature_incompat;  
-      uint32_t s_feature_ro_compat; 
+      uint32_t s_feature_ro_compat;
       uint8_t  s_uuid[16];          
       char     s_volume_name[16];   
-      unsigned char     s_last_mounted[64];  
+      unsigned char     s_last_mounted[64];
       uint32_t s_algo_bitmap;
-    } SB;
+   }SB;
 
-    typedef struct {
+   typedef struct {
       unsigned char BS_jmpBoot[3];     
       char BS_OEMName[8];              
-      unsigned short BPB_BytsPerSec;    
-      unsigned char BPB_SecPerClus;     
-      unsigned short BPB_RsvdSecCnt;    
-      unsigned char BPB_NumFATs;        
+      unsigned short BPB_BytsPerSec;   
+      unsigned char BPB_SecPerClus;    
+      unsigned short BPB_RsvdSecCnt;   
+      unsigned char BPB_NumFATs;       
       unsigned short BPB_RootEntCnt;   
       unsigned short BPB_TotSec16;     
-      unsigned char BPB_Media;          
-      unsigned short BPB_FATSz16;       
-      unsigned short BPB_SecPerTrk;     
-      unsigned short BPB_NumHeads;      
-      int BPB_HiddSec;                  
-      int BPB_TotSec32;               
-      unsigned char BS_DrvNum;          
-      unsigned char BS_Reserved1;       
-      unsigned char BS_BootSig;       
-      int BS_VolID;                     
-      char BS_VolLab[11];               
-      char BS_FilSysType[8];            
-    } BootSector;
+      unsigned char BPB_Media;         
+      unsigned short BPB_FATSz16;      
+      unsigned short BPB_SecPerTrk;    
+      unsigned short BPB_NumHeads;     
+      int BPB_HiddSec;                 
+      int BPB_TotSec32;                
+      unsigned char BS_DrvNum;         
+      unsigned char BS_Reserved1;      
+      unsigned char BS_BootSig;        
+      char BS_VolLab[11];              
+      char BS_FilSysType[8];           
+   }BootSector;
+
+   typedef struct {
+      char long_name[8];                  
+      char extension[3];                  
+      uint8_t fileAttr;
+      uint8_t reserved[10];
+      uint16_t tChange;
+      uint16_t dChange;
+      uint16_t firstCluster;
+      uint32_t fSize;
+   }dir_entry;
+
+   typedef struct{
+      uint32_t bg_block_bitmap;
+      uint32_t bg_inode_bitmap;
+      uint32_t bg_inode_table;
+      uint16_t bg_free_blocks_count;
+      uint16_t bg_free_inodes_count;
+      uint16_t bg_used_dirs_count;
+      uint16_t bg_pad;
+      unsigned char bg_reserved[12];
+   }GroupDescriptor;
+
+   typedef struct {
+      uint16_t i_mode;        
+      uint16_t i_uid;         
+      uint32_t i_size;        
+      uint32_t i_atime;       
+      uint32_t i_ctime;       
+      uint32_t i_mtime;       
+      uint32_t i_dtime;       
+      uint16_t i_gid;         
+      uint16_t i_links_count;
+      uint32_t i_blocks;      
+      uint32_t i_flags;       
+      uint32_t i_osd1;        
+      uint32_t i_block[15];   
+      uint32_t i_generation;  
+      uint32_t i_file_acl;    
+      uint32_t i_dir_acl;     
+      uint32_t i_faddr;       
+      unsigned char i_osd2[12];
+   } inodo;
+
+   typedef struct{
+      uint32_t inode;
+      uint16_t rec_len;
+      uint8_t name_len;
+      uint8_t file_type;
+   }ino_block;
    ```
 ### Proves realitzades
 
@@ -176,7 +243,6 @@ Git com a sistema de control de versions és molt comú a la realització de pro
 
 ## Conclusions generals
 
-Aquesta fase ha estat una primera introducció als sistemes de fitxers que ha estat molt interessant. Ja havia treballat anteriorment la teoria que s'ha treballat aqui a SOA a ASO però clarament no amb aquest nivell de profunditat ja que allà treballavem amb comandes que ens donaven tota la informació que cerquem en aquesta pràctica. 
+Aquesta fase ha estat una primera introducció als sistemes de fitxers que ha estat molt interessant. Ja havia treballat anteriorment la teoria que s'ha treballat aqui a SOA a ASO però clarament no amb aquest nivell de profunditat ja que allà treballavem amb comandes que ens donaven tota la informació que cerquem en aquesta pràctica.
 
 És per això que considero haver après bastant, i havent llegit el contingut de les properes fases, crec que seguiré aprenent més sobre aquests sistemes i el seu funcionament.
-
