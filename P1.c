@@ -80,7 +80,7 @@ int main(int argc, char*argv[]){
                 SYS_removeExtension(argv[3]);
                 switch(systemType){
                     case 1:
-                        bytes = EXT_findFile(argv[3], fdFitxer, superblock);
+                        bytes = EXT_findFile(argv[3], fdFitxer, superblock, 2);
                         if(bytes < 0){
                             if(bytes == -2){
                                 printf("\nError. Fitxer no trobat però sí un directori pel mateix nom.\n\n");

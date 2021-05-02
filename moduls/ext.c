@@ -67,9 +67,9 @@ void EXT_printSuperblock(SB* superblock){
 }
 
 
-int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
+int EXT_findFile(char* fitxer, int fdVolum, SB* sb, int inici){
 
-    inodo ino = EXT_trobaInode(fdVolum, sb, 2);
+    inodo ino = EXT_trobaInode(fdVolum, sb, inici);
     int byt=-1;
     uint16_t prevLen = 0;
     int block_size = 1024 << sb->s_log_block_size;
@@ -89,21 +89,22 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb){
                 name[blockActual.name_len] = '\0';
                 prevLen = blockActual.rec_len;
                 totalLen = totalLen + prevLen;
-                if(prevLen == 0 || totalLen>=ino.i_size){
+                if(prevLen == 0){
                     inner = 1;
                 }else{
                     if(strcmp(fitxer, name)==0 && blockActual.file_type == 1){
                         inner = 1;
                         totalLen = ino.i_size + 1000;
-
                         inodo ff = EXT_trobaInode(fdVolum, sb, blockActual.inode);
                         byt = ff.i_size;
-
-                    }else if(strcmp(fitxer, name)==0 && blockActual.file_type == 2){
-                        byt = -2;
+                    }else if(blockActual.file_type == 2 && strcmp(name, ".")!=0 && strcmp(name, "..")!=0 && strcmp(name, "lost+found")!=0){
+                        byt = EXT_findFile(fitxer, fdVolum, sb, blockActual.inode);
+                        if(byt>0){
+                            inner = 1;
+                            totalLen = ino.i_size + 1000;
+                        }
                     }
                 }
-
             }else{
                 inner=1;
             }
