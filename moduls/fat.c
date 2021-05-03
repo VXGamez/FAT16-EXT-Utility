@@ -54,23 +54,66 @@ void FAT_printBootSector(BootSector *bs){
     printf("Label: %s\n\n\n", token);
 }
 
-int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext){
+int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N){
 
-    //long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
-    lseek(fdFitxer, (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec ,SEEK_SET);
+    long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
+    //lseek(fdFitxer, (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec ,SEEK_SET);
+
+    //2A000
+    //172032
+
+    //i686 == La 168 == 2A000
+    //hdparm == 158 ==
+
+
+    uint32_t rootDir = bs->BPB_RootEntCnt * 32;
+
+    uint32_t firstDataSector =  (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))* bs->BPB_BytsPerSec ;
+
+    uint32_t final = ((N-2) * bs->BPB_SecPerClus * bs->BPB_BytsPerSec) + firstDataSector ;
+    if(N!=2){
+        final = final + rootDir;
+    }
+
+    printf("Final: %d - %x\n", final, final);
+    printf("Offset Que tenia: %ld - %lx\n", ll, ll);
+
+    lseek(fdFitxer, final ,SEEK_SET);
 
     int bytes=-1;
 
     dir_entry de;
-    for(int i=0; i<(bs->BPB_RootEntCnt*32)/(bs->BPB_BytsPerSec) ;i++){
-        read(fdFitxer, &de, sizeof(dir_entry));
-        SYS_clearFATvalue(de.long_name, 8);
-        SYS_clearFATvalue(de.extension, 3);
-        if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
-            if(strcmp(de.long_name, fitxer)==0 && strcmp(de.extension, ext)==0){
-                bytes = de.fSize;
+    int isDone = 0;
+    for(int i=0; !isDone ;i++){
+        pread(fdFitxer, &de, sizeof(dir_entry), final+i*sizeof(dir_entry));
+        if(de.long_name[0]==0x00){
+            isDone = 1;
+        }else{
+            SYS_clearFATvalue(de.long_name, 8);
+            SYS_clearFATvalue(de.extension, 3);
+            printf("Long Name: %s\n",de.long_name );
+
+            if(de.fileAttr == 16 && strcmp(de.long_name, ".") !=0 && strcmp(de.long_name, "..") !=0){
+                printf("Es directori\n");
+                printf("First Cluster: %d\n",de.firstCluster );
+                printf("Entro a la carpeta %s\n", de.long_name);
+                int byt = FAT_findFile(fitxer, fdFitxer, bs, ext, de.firstCluster);
+                printf("Torno a la carpeta anterior\n");
+                printf("Bytes: %d\n", byt);
+                if(byt>0){
+                    isDone = 1;
+                }
+            }else{
+                if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
+                    if(strcmp(de.long_name, fitxer)==0 && strcmp(de.extension, ext)==0){
+                        bytes = de.fSize;
+                    }
+                }
             }
+
+
         }
+
     }
 
 

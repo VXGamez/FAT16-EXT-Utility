@@ -92,7 +92,7 @@ int main(int argc, char*argv[]){
                         }
                         break;
                     case 2:
-                        bytes = FAT_findFile(argv[3], fdFitxer, bs, extension);
+                        bytes = FAT_findFile(argv[3], fdFitxer, bs, extension, 2);
                         if(bytes < 0){
                             printf("\nError. Fitxer no trobat.\n\n");
                         }else{
