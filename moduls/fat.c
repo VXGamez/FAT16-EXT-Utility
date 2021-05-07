@@ -56,16 +56,6 @@ void FAT_printBootSector(BootSector *bs){
 
 int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N){
 
-    long ll = (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec;
-    //lseek(fdFitxer, (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))*bs->BPB_BytsPerSec ,SEEK_SET);
-
-    //2A000
-    //172032
-
-    //i686 == La 168 == 2A000
-    //hdparm == 158 ==
-
-
     uint32_t rootDir = bs->BPB_RootEntCnt * 32;
 
     uint32_t firstDataSector =  (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))* bs->BPB_BytsPerSec ;
@@ -75,9 +65,7 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N){
         final = final + rootDir;
     }
 
-    printf("Final: %d - %x\n", final, final);
-    printf("Offset Que tenia: %ld - %lx\n", ll, ll);
-
+    char nomTMP[50];
     lseek(fdFitxer, final ,SEEK_SET);
 
     int bytes=-1;
@@ -91,23 +79,21 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N){
         }else{
             SYS_clearFATvalue(de.long_name, 8);
             SYS_clearFATvalue(de.extension, 3);
-            printf("Long Name: %s\n",de.long_name );
+            strcpy(nomTMP, de.long_name);
+
+            if(de.long_name[7]=='1' && de.long_name[6]=='~'){
+                de.long_name[6]='\0';
+                nomTMP[6] = '\0';
+            }
 
             if(de.fileAttr == 16 && strcmp(de.long_name, ".") !=0 && strcmp(de.long_name, "..") !=0){
-                printf("Es directori\n");
-                printf("First Cluster: %d\n",de.firstCluster );
-                printf("Entro a la carpeta %s\n", de.long_name);
                 int byt = FAT_findFile(fitxer, fdFitxer, bs, ext, de.firstCluster);
-                printf("Torno a la carpeta anterior\n");
-                printf("Bytes: %d\n", byt);
                 if(byt>0){
                     isDone = 1;
                 }
-            }else{
-                if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
-                    if(strcmp(de.long_name, fitxer)==0 && strcmp(de.extension, ext)==0){
-                        bytes = de.fSize;
-                    }
+            }else if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
+                if(strcmp(de.long_name, nomTMP)==0 && strcmp(de.extension, ext)==0) {
+                    bytes = de.fSize;
                 }
             }
 

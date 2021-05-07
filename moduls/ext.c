@@ -9,7 +9,7 @@ void EXT_printSuperblock(SB* superblock){
     Mida Inode: 128
     Num Inodes: 64
     Primer Inode: 11
-    Inodes Grup: 64 
+    Inodes Grup: 64
     Inodes Lliures: 38
     */
     printf("Mida Inode: %u\n", superblock->s_inode_size);
@@ -113,7 +113,6 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb, int inici){
             }
         }
     }
-
     return byt;
 }
 
@@ -124,11 +123,17 @@ inodo EXT_trobaInode(int fdVolum, SB* sb, int inode){
     GroupDescriptor groupbuffer;
 
     int block_size = 1024 << sb->s_log_block_size;
+
     lseek(fdVolum, (sb->s_first_data_block+1)*block_size, SEEK_SET);
+
     read(fdVolum, &groupbuffer, sizeof(GroupDescriptor));
+
     int block_group = (inode - 1) / sb->s_inodes_per_group;
     int index = (inode - 1) % sb->s_inodes_per_group;
+
+
     int offset = index*sb->s_inode_size;
+
     int group_table =  groupbuffer.bg_inode_table + block_group * sb->s_blocks_per_group;
     inodo ino;
     pread(fdVolum, &ino, sizeof(inodo), (group_table*block_size)+offset);

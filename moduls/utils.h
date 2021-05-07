@@ -36,10 +36,10 @@
 #define SUPERBLOCK_START 1024
 #define GROUP_DESCRIPTORS_SIZE 32
 #define ACCEPTED_OPERATIONS 2
-#define ACCEPTED_EXTENSIONS 9
+#define ACCEPTED_EXTENSIONS 10
 
 static const char acceptedOperations[2][20] = {"/info", "/find"};
-static const char acceptedExtensions[9][20] = {"dat", "bin", "h", "c", "txt", "jpg", "png", "zip", "hex"};
+static const char acceptedExtensions[10][20] = {"dat", "bin", "h", "c", "txt", "jpg", "png", "zip", "hex", "so.0.9.8"};
 
 
 typedef struct {
