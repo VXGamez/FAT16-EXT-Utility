@@ -1,13 +1,14 @@
 # SOA
 
-**Per aquesta entrega no s'ha realitzat una documentació detallada com per la anterior. S'ha començat a redactar i se seguirá de cara a l'entrega final**
-
 <p align="center">
   <a href="https://github.com/VXGamez/SOA/releases/tag/FASE1">
   <img src="https://img.shields.io/badge/FASE-1-brightgreen?style=for-the-badge&logo=c">
   </a>
 <a href="https://github.com/VXGamez/SOA/releases/tag/FASE2">
   <img src="https://img.shields.io/badge/FASE-2-brightgreen?style=for-the-badge&logo=c">
+  </a>
+<a href="https://github.com/VXGamez/SOA/releases/tag/FASE3">
+  <img src="https://img.shields.io/badge/FASE-3-brightgreen?style=for-the-badge&logo=c">
   </a>
 </p>
 
@@ -17,8 +18,8 @@
     <li><a href="#com-compilar">Com Compilar</a></li>
     <li><a href="#explicació-dels-sistemes-de-fitxers">Explicació dels Sistemes de Fitxers</a>
       <ul>
-        <li><a href="#fat16">FAT16</a></li>
         <li><a href="#ext">EXT</a></li>
+        <li><a href="#fat16">FAT16</a></li>
       </ul>
     </li>
     <li>
@@ -38,16 +39,16 @@
 </details>
 
 ## Com Compilar
-1. Ara per ara, només caldrà netejar anteriors execucions:
-   ```sh
-   make clean
-   ```
-2. Compilar novament emprant la comanda make:
+
+1. Per compilar caldrà emprar la comanda make:
    ```sh
    make
    ```
-3. Per executar emprar el executable p1 de la següent manera:
-   
+   En executar-se, es crearà el executable p1
+
+
+2. Per executar p1 escriure les següents comandes, en funció del mode desitjat:
+
    **· Mode /info**
    ```sh
    ./p1 /info <nom_volum>
@@ -56,15 +57,34 @@
    ```sh
    ./p1 /find <nom_volum> <fitxer_a_trobar>
    ```
-   
+
+   En cas que es vulguin afegir volums addicionals caldrà ubicar-los dins la carpeta fitxers.
 
 ## Explicació dels Sistemes de Fitxers
 
-Aquesta entrega incrementa bastant en dificultat en comparació a la anterior, a la anterior entrega se'ns demanava que comencéssim explorant els diferents sistemes de fitxers, visitant les regions de memòria on es desa la informació de cada un d’ells, el Superblock en cas del EXT i BootSector en el cas del FAT.
+Els sistemes de fitxers amb els que se’ns ha demanat que treballem tenen les seves similituds entre sí, però per una millor comprensió s’han explicat per separat però amb la intenció de establir una relació entre ells ja que tenen un plantejament similar.
 
-Però aquests dos “blocs”, no son més que això, blocs al sistema de fitxers, i tenen informació d’aquest, però no dels seus continguts, això es troba en altres blocs, i en això ha consistit aquesta fase.
 
-Essencialment, en ambdós sistemes de fitxers, tenim una divisió de blocs, tot i que reben noms diferents, a EXT parlarem de Blocs mentre que a FAT parlarem de Clusters, format per diferents Sectors. En el cas de EXT tenim un sistema de inodes, aquests funcionen d’una manera molt senzilla. En EXT tenim els fitxers, o més aviat les dades, agrupades per regions de memòria, i un inode no es més que un “índex” que ens senyala on son totes aquestes regions de memòria pel que un inode no “conté” els fitxers sinó que hi apunta però sí conté dades
+### EXT
+
+
+Un sistema de fitxers EXT es divideix en una sèrie de grups de blocs. Per reduir les dificultats de rendiment a causa de la fragmentació, l'assignació de blocs s'esforça molt per mantenir els blocs de cada fitxer dins del mateix grup, reduint així els temps de cerca. La mida d’un grup de blocs s’especifica als blocs superblock.s_blocks_per_group, tot i que també es pot calcular com a 8 * block_size_in_bytes. Amb la mida de bloc predeterminada de 4KiB, cada grup contindrà 32.768 blocs, per a una longitud de 128 MB. El nombre de grups de blocs és la mida del dispositiu dividida per la mida d’un grup de blocs.
+
+Pel cas especial del grup de blocs 0 (superblock) , els primers 1024 bytes no s’utilitzen d'aquesta manera el superblock començarà amb un desplaçament de 1024 bytes, sigui el bloc que sigui (normalment 0).
+
+Ext4 funciona principalment amb el superblock i els descriptors de grups que es troben al grup de blocs 0. La ubicació de la taula d’inodes ve donada per bg_inode_table. És un rang continu de blocs prou gran com per contenir s_inodes_per_group * sb.s_inode_size bytes.
+
+![Estructura1](./readme_resources/ext/structure.png)
+
+Pel que fa a l’ordenació d’elements d’un grup de blocs, generalment s’estableix que el superbloc i la taula de descriptors de grups, si hi ha, estaran al principi del grup de blocs. Els mapes de bits i la taula d’inodes estan a continuació. L’espai sobrant s’utilitza per a blocs de dades de fitxers, mapes de blocs indirectes, blocs d’arbre d’extensió i atributs ampliats. Aquesta estructura es repeteix per cada Block Group fins al Block Group N, tal i com podem veure a la imatge.
+
+La taula d’inodes té N inodes, i cada inode conté un array de blocs situats a la part de blocs de dades. Cada un d’aquests blocs, conté un seguit de entrades de directori. És a dir, un inode conté aquest array de blocs, i repartit al llarg d’aquest array estan tots els elements que conté el inode, ja siguin directoris o fitxers. A la imatge a continuació he posat un exemple de com és aquesta estructura.
+
+![Estructura2](./readme_resources/ext/block_array.png)
+
+Podem veure com el inode ROOT, que és el 2 en el cas de EXT, apunta a aquest block[0] (n’hi ha 14 més però per poder il·lustrar-ho correctament només estic agafant el primer bloc). En el bloc 0 del inode 2 trobem 5 elements, els directoris . i .., els fitxers picture.jpg i test.txt, i finalment el directori home. Per accedir a aquest directori es fa de la mateixa manera que per l’inode root. Es visita el inode de home, el 13, i des-de l’inode 13 es recorre el seu array de blocs. I així repetidament.
+
+
 
 
 ### FAT16
@@ -73,7 +93,15 @@ La taula d'assignació de fitxers (File Allocation Table - FAT) és una taula em
 
 L’espai d’emmagatzematge d’un disquet es divideix en unitats anomenades sectors. En dispositius d'emmagatzematge més grans, a un conjunt de sectors formen un clúster. No obstant això, per al disquet, el nombre de sectors en un clúster és un. A més, la mida d'un sector (i, per tant, d'un clúster) és de 512 bytes per a un disquet.
 
-El disseny d'un disquet FAT-16 consta de quatre seccions principals: el Boot Sector, les taules FAT, el directori root i l'àrea de dades.
+![Estructura2](./readme_resources/fat/general.png)
+
+Expandit:
+
+![Estructura2](./readme_resources/fat/expandit.png)
+
+El disseny d'un disquet FAT-16 consta de quatre seccions principals: el Boot Sector (A l’àrea reservada), les taules FAT, el directori root i l'àrea de dades. A l’àrea de dades trobarem també tots els subdirectoris del sistema.
+
+![Estructura2](./readme_resources/fat/bootSector.png)
 
 El Boot Sector, o sector d'arrencada, és en el primer sector (sector 0) del volum o del disc. Conté informació específica sobre la resta d'organitzacions del sistema de fitxers, per exemple quantes còpies de taules FAT hi ha, com de gran és un sector, quants sectors hi ha en un clúster, etc.
 
@@ -81,40 +109,44 @@ Les taules FAT contenen punters a tots els clústers del disc e indiquen el núm
 
 El directori root és el directori principal del disc. A diferència d'altres directoris situats a l'àrea de dades del disc, el directori root té una mida finita (per a FAT16, 14 sectors * 16 entrades de directori per sector = 224 entrades possibles), restringint la quantitat total de fitxers o directoris que es poden crear-hi.
 
+![Estructura2](./readme_resources/fat/dataAreaExpandit.png)
+
 A l'àrea de dades, el primer sector o clúster de l'àrea de dades correspon al clúster 2 del fitxer sistema. L'àrea de dades conté dades de fitxers i directoris i abasta la resta de sectors del disc.
 
-### EXT
+Cada clúster té un seguit de directory entries, de manera similar al sistema EXT, on trobarem la informació rellevant dels fitxers que conté.
 
-Els sistemes de fitxers ampliats (Extended Filesystems - EXT) es troben a moltes distribucions de Linux que van des d’Ubuntu fins a Mac OS fins a Android. A més, aquests sistemes de fitxers contenen inodes de tal manera que tots els fitxers o directoris estan representats per un inode. Cada inode conté informació sobre el tipus de fitxer, els drets d’accés, els propietaris, les marques de temps, la mida i els indicadors de blocs de dades.
+![Estructura2](./readme_resources/fat/dirEntry.png)
 
-Un sistema de fitxers EXT es divideix en una sèrie de grups de blocs. Per reduir les dificultats de rendiment a causa de la fragmentació, l'assignació de blocs s'esforça molt per mantenir els blocs de cada fitxer dins del mateix grup, reduint així els temps de cerca. La mida d’un grup de blocs s’especifica als blocs superblock.s_blocks_per_group, tot i que també es pot calcular com a 8 * block_size_in_bytes. Amb la mida de bloc predeterminada de 4KiB, cada grup contindrà 32.768 blocs, per a una longitud de 128 MB. El nombre de grups de blocs és la mida del dispositiu dividida per la mida d’un grup de blocs.
-
-Per al cas especial del grup de blocs 0 (superblock) , els primers 1024 bytes no s’utilitzen d'aquesta manera el superblock començarà amb un desplaçament de 1024 bytes, sigui el bloc que sigui (normalment 0).
-
-El controlador ext4 funciona principalment amb el superblock i els descriptors de grups que es troben al grup de blocs 0. La ubicació de la taula d’inodes ve donada per bg_inode_table. És un rang continu de blocs prou gran com per contenir s_inodes_per_group * sb.s_inode_size bytes.
-
-Pel que fa a l’ordenació d’elements d’un grup de blocs, generalment s’estableix que el superbloc i la taula de descriptors de grups, si hi ha, estaran al principi del grup de blocs. Els mapes de bits i la taula d’inodes poden estar a qualsevol lloc i és molt possible que els mapes de bits arribin després de la taula d’inodes o que tots dos estiguin en grups diferents (flex_bg). L’espai sobrant s’utilitza per a blocs de dades de fitxers, mapes de blocs indirectes, blocs d’arbre d’extensió i atributs ampliats.
 
 ## Explicació de la pràctica
 
 ### Requeriments
 
-De cara a executar aquesta pràctica crec només hi ha un parell de requeriments que son compilar el programa, i tenir els fitxers en el directori per poder-li passar com a arguments quan s'executi.
+La pràctica no té gaires requeriments. Es demana que pel seu disseny, es faci servir un sistema per mòduls, per poder tenir separada la implementació de cada sistema de fitxers.
+
+Més enllà d’això, no ha calgut gaire altre cosa. S’ha implementat en C. I el que sí caldrà es tenir els volum de fitxers en els directoris indicats per fer que funcioni.
+
 
 ### Disseny
 
-Pel que fa al disseny d'aquesta primera fase ha estat molt senzill. Tot i que el enunciat ho especifica, encara no he emprat disseny modular ja que no m'ha calgut ni li he vist una utilitat per aquesta primera fase. Més endevant sí dividiré les funcions d'utilitat per mòduls, però de cara a aquesta primera entrega no m'ha fet falta.
+El desenvolupament de la pràctica s’ha dividit per fases. I al llarg d’aquestes fases s’ha variat el disseny de forma incremental. Inicialment, es va plantejar de tal manera que es realitzessin lectures directes a estructures en C des de els offsets indicats per la teoria d’aquell sistema de fitxers. De tal manera que, per llegir el Superblock de EXT o el BootSector de FAT, tenia una estructura amb tots els camps de cada un, em situava en el offset pertinent i realitzava la lectura.
 
-De cara al funcionament, ha estat senzill. Inicialment tenia intenció de desplaçar el cursor del fitxer binari a les posicions indicades pels documents de teoria i anar fent lectures dels tamanys indicats, però me'n vaig adonar bastant dora de que això suposaria un volum de codi elevat i no era gaire òptim estar pujant i baixant el cursor cada cop per cuadrar adequadament els offsets. És per això que el que he fet ha estat declarar dues estructures, una per el sistema de fitxers EXT i l'altre pel sistema de fitxers FAT12, i assegurar-me de que aquestes estructures tenen el tamany, i tamany de variables adequat per realitzar la lectura de la taula de cop, amb un sol read.
+Més endavant me’n he adonat de que aquest sistema no és el millor sempre donat que en el cas de FAT, per algun motiu, en llegir directament a la estructura no funcionava però sí llegint camp a camp. Suposo que per alguna problemàtica de padding. Pel que lo únic que ha variat de la fase 1 a les següents ha estat la manera en que llegeixo el BootSector.
 
-És per això que puc dir que la meva pràctica funciona realitzant una simple lectura desde el offset 1024, en cas que el nombre s_magic de la estuctura no sigui equivalent a 0xEF53, considerem que no és EXT, pel que torno a desplaçar el cursor del fitxer binari a la posició desitjada per FAT12, i realitzo la lectura però aquest cop de la estructura del BootSector. A continuació realitzo la comprovació del número de clusters, i si aquesta és satisfactòria sabré que es tracta de un sistema FAT12, sinó, aviso al usuari mitjançant un missatge per pantalla.
+Però, per les següents fases estar clar que caldria pensar una mica més enllà d’aquests blocs inicials. Per la fase 2, donat que compartia funcionalitat amb la 3 vaig mirar de fer un disseny bastant robust i que pogués reutilitzar tant per la 3 com per la 4. És per això que vaig mirar de fer funcions genèriques.
+
+En el cas de EXT, tenim dues funcions que permeten el funcionament de la pràctica. La funció EXT_trobaInode, que ubica un inode N al sistema de fitxers i el retorna desat a la seva estructura. La funció EXT_findFile, encarregada de, des d’un inode N, navegar per tot el seu array de blocs i directory entries cridant-se a si mateixa en cas de trobar algun directori canviant l’origen de la funció del inode N original, a el inode del directori gràcies a la funció trobaInode.
+
+Pel cas de fat he emprat un funcionament similar però no ha fet falta una funció com trobaInode donat que no tenim inodes en aquest sistema de fitxers. A fat amb laa funció findFile ja en tenim suficient, ja que reb un punt d’inici, i recorre totes les directory entries del clúster que rep, inicialment el root però a mesura que es fan crides recursives son els dels sub-directoris.
+
 
 ### Estructures de dades Usades
 
-Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una sola lectura desant-se completament a les estrucutres, pel que he hagut de declarar totes les variables necessàries per poder contenir la taula sencera, ja sigui la del Boot Sector del sistema FAT12 o la del Superblock de EXT.
+Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una sola lectura desant-se completament a les estructures. A continuació hi ha totes les estructures emprades, des de les del Superblock o BootSector de la fase 1, a totes les necessàries per fer funcionar la fase 2, 3 i 4.
+
 
    ```c
-   typedef struct {
+    typedef struct {
       uint32_t s_inodes_count;      
       uint32_t s_blocks_count;      
       uint32_t s_r_blocks_count;    
@@ -139,8 +171,7 @@ Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una 
       uint32_t s_creator_os;        
       uint32_t s_rev_level;         
       uint16_t s_def_resuid;        
-      uint16_t s_def_resgid;        
-
+      uint16_t s_def_resgid;
       uint32_t s_first_ino;         
       uint16_t s_inode_size;        
       uint16_t s_block_group_nr;    
@@ -150,7 +181,7 @@ Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una 
       uint8_t  s_uuid[16];          
       char     s_volume_name[16];   
       unsigned char     s_last_mounted[64];
-      uint32_t s_algo_bitmap;
+      uint32_t s_algo_bitmap;  
    }SB;
 
    typedef struct {
@@ -176,8 +207,8 @@ Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una 
    }BootSector;
 
    typedef struct {
-      char long_name[8];                  
-      char extension[3];                  
+      char long_name[8];
+      char extension[3];
       uint8_t fileAttr;
       uint8_t reserved[10];
       uint16_t tChange;
@@ -198,23 +229,23 @@ Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una 
    }GroupDescriptor;
 
    typedef struct {
-      uint16_t i_mode;        
-      uint16_t i_uid;         
-      uint32_t i_size;        
-      uint32_t i_atime;       
-      uint32_t i_ctime;       
-      uint32_t i_mtime;       
-      uint32_t i_dtime;       
-      uint16_t i_gid;         
+      uint16_t i_mode;       
+      uint16_t i_uid;        
+      uint32_t i_size;       
+      uint32_t i_atime;      
+      uint32_t i_ctime;      
+      uint32_t i_mtime;      
+      uint32_t i_dtime;      
+      uint16_t i_gid;        
       uint16_t i_links_count;
-      uint32_t i_blocks;      
-      uint32_t i_flags;       
-      uint32_t i_osd1;        
-      uint32_t i_block[15];   
-      uint32_t i_generation;  
-      uint32_t i_file_acl;    
-      uint32_t i_dir_acl;     
-      uint32_t i_faddr;       
+      uint32_t i_blocks;     
+      uint32_t i_flags;      
+      uint32_t i_osd1;       
+      uint32_t i_block[15];  
+      uint32_t i_generation;
+      uint32_t i_file_acl;   
+      uint32_t i_dir_acl;    
+      uint32_t i_faddr;      
       unsigned char i_osd2[12];
    } inodo;
 
@@ -227,22 +258,46 @@ Tal i com s'indica al disseny de la pràctica, s'han llegit les regions amb una 
    ```
 ### Proves realitzades
 
-De cara a aquesta fase les úniques proves realitzades han estaat amb els fitxers proveïts al estudy. Aquests han estat els únics que he llegit i consultat al llarg del desenvolupament de la F1.
+De cara a aquesta fase les úniques proves realitzades han estat amb els fitxers proveïts al estudy. Aquests han estat els únics que he llegit i consultat al llarg del desenvolupament de la F1.
+
+Se’ns ha donat també un link amb la explicació de com realitzar el nostre propi sistema de fitxers però no he estat capaç de fer-ho funcionar.
+
+De la mateixa manera, se’ns va recomanar que muntéssim els volums a una màquina Linux per poder consultar-ne el contingut i organització de carpetes manualment, però per algun motiu no he estat capaç de fer funcionar la comanda.
 
 ### Problemes observats
 
-Pel que fa als problemes, hi han hagut uns quants. Començaria per comentar els de plantejament. Inicialment volia emprar la comanda lseek() de c, per poder desplaçar lliurement el cursor pel fitxer binari i anar agafant els valors que necessiti en cada moment.
+Pel que fa als problemes, hi ha hagut uns quants. Principalment per entendre com realitzar cada fase a nivell intuïtiu, no pràctic, és a dir, entendre què havia de fer en cada moment.
+
+He realitzar nombroses cerques a internet i visites a dubtes per poder entendre exactament com navegar els diferents sistemes de fitxers i entendre com plantejar cada fase.
+
+Més enllà de problemes de plantejament, he tingut problemes com el esmenat a la part de proves realitzades, on per comprovar el contingut dels volums se’ns va recomanar realitzar un mount dels diferents sistemes de fitxers però no he estat capaç de fer funcionar aquest mount ni des del meu MacBook, ni des-de matagalls/montserrat, ni des-de la meva màquina virtual ubuntu.
+
+La solució a aquest problema ha estat demanar que un company realitzés el mount i em passés la carpeta resultant, per poder tenir constància del contingut de cada un dels sistemes de fitxers.
 
 ### Estimació Temporal
 
-El temps emprat per la realització d'aquesta fase no ha estat gaire elevat. Tot i que queda tot reflectit al git, la realització dels sistemes FAT i EXT ser de una tarda, aproximadament de unes 5h. Tot i així, això no reflecteix el nombre de commits que s'han anat realitzant, ja que he anat fent petites correccions al format en el que es mostraven les dades, i sobretot, realitzant aquesta documentació, que ha tingut un cost temporal aproximat a 2h.
+Pel que fa al temps emprat, es pot consultar al històric de GitHub però el que més he trigat en fer ha estat la F2. Aquesta és la fase més llarga ja que és la que ha requerit més temps per plantejar i enfocar de cara a que les properes fases poguessin ser més senzilles.
+
+<img src="/readme_resources/pieChart.png" width="200px" height="200px" />
+
+Tal i com es pot veure en aquest gràfic, la F2 ha estat la que ha requerit més temps ja que és la fase en la que he plantejat les fases 3 i 4 també. La fase 1 va tenir un temps significatiu però res comparat amb les demés ja que era només llegir una regió al inici del fitxer. La complicació estava en que era el primer contacte amb aquests sistemes de fitxers.
+
 
 ## Explicació i valoració del GIT
 
-Git com a sistema de control de versions és molt comú a la realització de projectes, i és un entorn de treball real i que ens trobarem el dia de demà a l'empresa que sigui que treballem. M'ha servit per estructura el projecte amb diferents branques, diferents espais on he implementat individualment funcionalitats abans de juntar-les al projecte final.
+Git com a sistema de control de versions és molt comú a la realització de projectes, i és un entorn de treball real i que ens trobarem el dia de demà a l'empresa que sigui que treballem. M'ha servit per estructura el projecte amb diferents branques, diferents espais on he implementat individualment funcionalitats abans de ajuntar-les al projecte final.
+
+S’ha intentat que per cada fase del projecte hi hagués un seguit de branques on s’implementés la funcionalitat desitjada per un sistema de fitxers, i després a l’altre branca per l’altre, mantenint així una separació lògica.
+
 
 ## Conclusions generals
 
-Aquesta fase ha estat una primera introducció als sistemes de fitxers que ha estat molt interessant. Ja havia treballat anteriorment la teoria que s'ha treballat aqui a SOA a ASO però clarament no amb aquest nivell de profunditat ja que allà treballavem amb comandes que ens donaven tota la informació que cerquem en aquesta pràctica.
+Aquesta pràctica ha estat una introducció molt interessant als sistemes de fitxers, i m’ha ajudat a entendre molt millor com s’endrecen els fitxers en un sistema operatiu i les diferències entre sí. Ja havia treballat anteriorment la teoria que s'ha treballat a SOA a ASO però clarament no amb aquest nivell de profunditat ja que allà treballàvem amb comandes que ens donaven tota la informació que cerquem en aquesta pràctica.
 
-És per això que considero haver après bastant, i havent llegit el contingut de les properes fases, crec que seguiré aprenent més sobre aquests sistemes i el seu funcionament.
+Potser el més interessant ha estat el a partir de un fitxer, que és un volum de fitxers, poder navegar les dades binàries consultant valors reals i fitxers reals que ifns ara només havia vist a través de una interfície gràfica proveïda pel sistema operatiu, no ho havia vist mai a aquest baix nivell.
+
+Em resulta molt curiós també com els dos sistemes de fitxers funcionen de una manera o altre amb un sistema de punters a diferents blocs del sistema operatiu, i com això te un cost molt baix a nivell de temps d’accés pel sistema operatiu ja que molts dels accessos son gairebé directes. 
+
+
+
+
