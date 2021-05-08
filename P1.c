@@ -9,7 +9,7 @@ BootSector *bs=NULL;
 
 void freeMem(){
   if(fdFitxer>0){
-    close(fdFitxer);
+      close(fdFitxer);
   }
   if(bs!=NULL){
       free(bs);
@@ -39,7 +39,7 @@ int main(int argc, char*argv[]){
             }
         }
 
-        fdFitxer = open(SYS_fileInDirectory("fitxers", argv[2]), O_RDONLY);
+        fdFitxer = open(SYS_fileInDirectory("fitxers", argv[2]), O_RDWR);
         if(fdFitxer<0){
             SYS_fileNotFound(fdFitxer,operationType);
             freeMem();
@@ -65,7 +65,7 @@ int main(int argc, char*argv[]){
                     break;
 
             }
-        }else if(operationType == 2){
+        }else if(operationType == 2 ||operationType == 3){
             int bytes;
 
             if(systemType!=2 && systemType!=1){
@@ -80,7 +80,7 @@ int main(int argc, char*argv[]){
                 SYS_removeExtension(argv[3]);
                 switch(systemType){
                     case 1:
-                        bytes = EXT_findFile(argv[3], fdFitxer, superblock, 2);
+                        bytes = EXT_findFile(argv[3], fdFitxer, superblock, 2, operationType-2);
                         if(bytes < 0){
                             if(bytes == -2){
                                 printf("\nError. Fitxer no trobat però sí un directori pel mateix nom.\n\n");
@@ -88,8 +88,13 @@ int main(int argc, char*argv[]){
                                 printf("\nError. Fitxer no trobat.\n\n");
                             }
                         }else{
-                            printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                            if(operationType == 2){
+                                printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                            }else if(operationType == 3) {
+                                printf("\nEl fitxer %s ha estat eliminat.\n\n", argv[3]);
+                            }
                         }
+
                         break;
                     case 2:
                         bytes = FAT_findFile(argv[3], fdFitxer, bs, extension, 2);
