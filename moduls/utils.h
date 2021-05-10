@@ -35,10 +35,10 @@
 #define INFO_VOLUM "\nINFO VOLUM\n"
 #define SUPERBLOCK_START 1024
 #define GROUP_DESCRIPTORS_SIZE 32
-#define ACCEPTED_OPERATIONS 2
+#define ACCEPTED_OPERATIONS 3
 #define ACCEPTED_EXTENSIONS 10
 
-static const char acceptedOperations[2][20] = {"/info", "/find"};
+static const char acceptedOperations[3][20] = {"/info", "/find", "/delete"};
 static const char acceptedExtensions[10][20] = {"dat", "bin", "h", "c", "txt", "jpg", "png", "zip", "hex", "so.0.9.8"};
 
 

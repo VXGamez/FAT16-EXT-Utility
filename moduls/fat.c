@@ -102,6 +102,14 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N){
 
     }
 
+    /*
+     * Per esborrar fat?
+     * first_char = 0xe5;
+     * Marcar tots els clusters de la directory entry com a free?
+     * de.firstCluster = 0
+     *
+     * */
+
 
     return bytes;
 }
