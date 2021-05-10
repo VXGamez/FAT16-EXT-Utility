@@ -97,11 +97,15 @@ int main(int argc, char*argv[]){
 
                         break;
                     case 2:
-                        bytes = FAT_findFile(argv[3], fdFitxer, bs, extension, 2);
+                        bytes = FAT_findFile(argv[3], fdFitxer, bs, extension, 2, operationType-2);
                         if(bytes < 0){
                             printf("\nError. Fitxer no trobat.\n\n");
                         }else{
-                            printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                            if(operationType == 2){
+                                printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                            }else if(operationType == 3) {
+                                printf("\nEl fitxer %s ha estat eliminat.\n\n", argv[3]);
+                            }
                         }
                         break;
                 }
