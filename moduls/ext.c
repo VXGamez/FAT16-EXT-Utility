@@ -72,6 +72,8 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb, int inici, int flag){
     inodo ino = EXT_trobaInode(fdVolum, sb, inici);
     int byt=-1;
     uint16_t prevLen = 0;
+    long prevPrev = 0;
+    uint16_t prevPrevLen = 0;
     int block_size = 1024 << sb->s_log_block_size;
     int totalLen=0;
     int inner= 0;
@@ -81,6 +83,8 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb, int inici, int flag){
         prevLen = 0;
         lseek(fdVolum, block_size + block_size*(ino.i_block[j]-1)+totalLen, SEEK_SET);
         while(!inner){
+            prevPrev = block_size + block_size*(ino.i_block[j]-1)+totalLen;
+            prevPrevLen = prevLen;
             pread(fdVolum, &blockActual, sizeof(ino_block), block_size + block_size*(ino.i_block[j]-1)+totalLen);
             char*name=NULL;
             if(blockActual.name_len>0){
@@ -99,10 +103,14 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb, int inici, int flag){
                         if(flag == 0){
                             byt = ff.i_size;
                         }else if(flag == 1){
-                            lseek(fdVolum, block_size + block_size*(ino.i_block[j]-1)+totalLen, SEEK_SET);
+                            lseek(fdVolum, prevPrev, SEEK_SET);
                             int numInode = blockActual.inode;
                             blockActual.inode = 0;
                             write(fdVolum, &blockActual, sizeof(ino_block));
+
+                            lseek(fdVolum, prevPrev-prevPrevLen, SEEK_SET);
+                            uint16_t newLen = prevLen + prevPrev;
+                            write(fdVolum, &newLen, 2);
                             EXT_deleteFile(fdVolum, sb, numInode, ff);
                             byt = 100000;
                         }
@@ -169,7 +177,7 @@ void EXT_deleteFile(int fdVolum, SB* sb, int inode, inodo ff ){
         lseek(fdVolum, 1024 * groupbuffer.bg_inode_bitmap, SEEK_SET);
         write(fdVolum, &inode_bitmap, 2);
 
-        (sb->s_free_inodes_count)--;
+        (sb->s_free_inodes_count)++;
         lseek(fdVolum, 1024, SEEK_SET);
         write(fdVolum, sb, 1024);
 
@@ -189,6 +197,7 @@ inodo EXT_trobaInode(int fdVolum, SB* sb, int inode){
 
     int block_group = (inode - 1) / sb->s_inodes_per_group;
     int index = (inode - 1) % sb->s_inodes_per_group;
+
 
 
     int offset = index*sb->s_inode_size;
