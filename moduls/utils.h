@@ -26,6 +26,7 @@
 #define ERR_ARGUMENTS "El número d'arguments és incorrecte\n"
 #define ERR_OP_NO_PERMESA "Operació no permesa\n"
 #define ERR_NO_EXISTEIX "Fitxer no existeix\n"
+#define ERR_NO_FIND_DELETE "\nError. Volum inexistent.\n\n"
 #define ERR_NO_FIND_EXISTEIX "\nError. Volum no trobat.\n\n"
 #define ERR_NO_ES_FORMAT_VALID_FIND "Error. Volum no formatat en FAT16 ni EXT2\n\n"
 #define ERR_NO_ES_FORMAT_VALID "Sistema d’arxius no és ni EXT2 ni FAT16.\n\n"

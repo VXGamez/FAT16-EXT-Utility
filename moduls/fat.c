@@ -90,14 +90,25 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N, i
                 int byt = FAT_findFile(fitxer, fdFitxer, bs, ext, de.firstCluster, flag);
                 if(byt>0){
                     isDone = 1;
+                    bytes = byt;
                 }
-            }else if(strlen(de.long_name)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
-                if(strcmp(de.long_name, nomTMP)==0 && strcmp(de.extension, ext)==0) {
-                    if(flag == 0){
-                        bytes = de.fSize;
-                    }else if(flag==1){
-                        de.long_name[0] = 0xe5;
-                        pwrite(fdFitxer, &de, sizeof(dir_entry), final+i*sizeof(dir_entry));
+            }else if(strlen(nomTMP)>0 && de.fileAttr>0 && ((int)de.fSize)>0 ){
+                if(strcmp(fitxer, nomTMP)==0) {
+                    int esOk = 1;
+                    if(strlen(de.extension)>0){
+                        if(strcmp(de.extension, ext)!=0){
+                            esOk = 0;
+                        }
+                    }
+                    if(esOk){
+                        if(flag == 0){
+                            bytes = de.fSize;
+                        }else if(flag==1){
+                            de.long_name[0] = 0xe5;
+                            bytes = 1000;
+                            pwrite(fdFitxer, &de, sizeof(dir_entry), final+i*sizeof(dir_entry));
+                        }
+                        isDone = 1;
                     }
 
                 }
@@ -107,15 +118,6 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N, i
         }
 
     }
-
-    /*
-     * Per esborrar fat?
-     * first_char = 0xe5;
-     * Marcar tots els clusters de la directory entry com a free?
-     * de.firstCluster = 0
-     *
-     * */
-
 
     return bytes;
 }

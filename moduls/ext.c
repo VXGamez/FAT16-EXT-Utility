@@ -96,6 +96,7 @@ int EXT_findFile(char* fitxer, int fdVolum, SB* sb, int inici, int flag){
                 if(prevLen == 0){
                     inner = 1;
                 }else{
+
                     if(strcmp(fitxer, name)==0 && blockActual.file_type == 1){
                         inner = 1;
                         totalLen = ino.i_size + 1000;
