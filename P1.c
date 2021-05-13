@@ -97,11 +97,26 @@ int main(int argc, char*argv[]){
 
                         break;
                     case 2:
-                        bytes = FAT_findFile(argv[3], fdFitxer, bs, extension, 2);
+                        ;
+                        char* auxNom = (char*)malloc(sizeof(char)*(strlen(argv[3])+1));
+                        SYS_toLower(argv[3]);
+                        strcpy(auxNom, argv[3]);
+                        if(strlen(argv[3]) > 6){
+                            argv[3][6] = '\0';
+                        }
+                        bytes = FAT_findFile(argv[3], fdFitxer, bs, extension, 2, operationType-2);
                         if(bytes < 0){
                             printf("\nError. Fitxer no trobat.\n\n");
                         }else{
-                            printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                            if(operationType == 2){
+                                printf("\nFitxer trobat. Ocupa %d bytes.\n\n" ,bytes);
+                            }else if(operationType == 3) {
+                                printf("\nEl fitxer %s", auxNom);
+                                if(strlen(extension)>0){
+                                    printf(".%s", extension);
+                                }
+                                printf(" ha estat eliminat.\n\n");
+                            }
                         }
                         break;
                 }

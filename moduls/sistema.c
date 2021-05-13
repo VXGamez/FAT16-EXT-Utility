@@ -58,6 +58,7 @@ char* SYS_getExtension(char* file){
       extension = (char*)malloc(1);
       extension[0] = '\0';
     }
+    SYS_toLower(extension);
     return extension;
 }
 
@@ -107,6 +108,9 @@ void SYS_fileNotFound(int fdFile, int opType){
             break;
         case 2:
             write(1, ERR_NO_FIND_EXISTEIX, strlen(ERR_NO_FIND_EXISTEIX));
+            break;
+        case 3:
+            write(1, ERR_NO_FIND_DELETE, strlen(ERR_NO_FIND_DELETE));
             break;
         default:
             break;
