@@ -60,7 +60,10 @@
    ```sh
    ./p1 /find <nom_volum> <fitxer_a_trobar>
    ```
-
+   **· Mode /delete**
+   ```sh
+   ./p1 /delete <nom_volum> <fitxer_a_eliminar>
+   ```
    En cas que es vulguin afegir volums addicionals caldrà ubicar-los dins la carpeta fitxers.
 
 ## Explicació dels Sistemes de Fitxers
