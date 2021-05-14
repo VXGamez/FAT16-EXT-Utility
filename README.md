@@ -10,6 +10,9 @@
 <a href="https://github.com/VXGamez/SOA/releases/tag/FASE3">
   <img src="https://img.shields.io/badge/FASE-3-brightgreen?style=for-the-badge&logo=c">
   </a>
+<a href="https://github.com/VXGamez/SOA/releases/tag/FASE4">
+  <img src="https://img.shields.io/badge/FASE-4-brightgreen?style=for-the-badge&logo=c">
+  </a>
 </p>
 
 <details open="open">
@@ -137,7 +140,11 @@ Però, per les següents fases estar clar que caldria pensar una mica més enll�
 
 En el cas de EXT, tenim dues funcions que permeten el funcionament de la pràctica. La funció EXT_trobaInode, que ubica un inode N al sistema de fitxers i el retorna desat a la seva estructura. La funció EXT_findFile, encarregada de, des d’un inode N, navegar per tot el seu array de blocs i directory entries cridant-se a si mateixa en cas de trobar algun directori canviant l’origen de la funció del inode N original, a el inode del directori gràcies a la funció trobaInode.
 
-Pel cas de fat he emprat un funcionament similar però no ha fet falta una funció com trobaInode donat que no tenim inodes en aquest sistema de fitxers. A fat amb laa funció findFile ja en tenim suficient, ja que reb un punt d’inici, i recorre totes les directory entries del clúster que rep, inicialment el root però a mesura que es fan crides recursives son els dels sub-directoris.
+Pel cas de fat he emprat un funcionament similar però no ha fet falta una funció com trobaInode donat que no tenim inodes en aquest sistema de fitxers. A fat amb la funció findFile ja en tenim suficient, ja que reb un punt d’inici, i recorre totes les directory entries del clúster que rep, inicialment el root però a mesura que es fan crides recursives son els dels sub-directoris.
+
+Finalment, pel que fa a la eliminació de fitxers, s’han emprat les funcions comentades anteriorment per ubicar-los, però ara en trobar el fitxer, s’han volgut realitzar un seguit de modificacions. Pel cas de FAT simplement s’ha afegit a la casella 0 del nom el caràcter hexadecimal 0x0e5, marcant aquella directory entry com a eliminada.
+
+Pel que fa a EXT, ha estat una mica més complicat degut a que hi havia un nombre més elevat de modificacions a realitzar. Primerament he incrementat la reclen de la directory entry anterior a la del fitxer a el seva mida + la mida del fitxer a eliminar. A més, he posat el inode de la directory entry a eliminar a 0 després d’haver visitat aquell inode i posat tot el seu array de i_blocks a 0, la seva mida a 0, posar en els flags el valor: 0x040, afegir-li una hora d’eliminació, shiftar el inode bitmap per acabar de eliminar el inode, i finalment incrementar en el superblock el numero de inodes lliures.
 
 
 ### Estructures de dades Usades
@@ -262,7 +269,8 @@ De cara a aquesta fase les úniques proves realitzades han estat amb els fitxers
 
 Se’ns ha donat també un link amb la explicació de com realitzar el nostre propi sistema de fitxers però no he estat capaç de fer-ho funcionar.
 
-De la mateixa manera, se’ns va recomanar que muntéssim els volums a una màquina Linux per poder consultar-ne el contingut i organització de carpetes manualment, però per algun motiu no he estat capaç de fer funcionar la comanda.
+El que sí he fet ha estat muntar els diferents sistemes mitjançant una màquina virtual d’ubuntu a una carpeta, per poder explorar el contingut dels sistemes de fitxers. Aquest muntatge m’ha portat molts problemes ja que al principi no havia estat capaç de fer-ho tot i ser una comanda molt senzilla. Va resultar que el problema es que no podia muntar fitxers que es troben al mac a carpetes del mac, ni fitxers que es troben al mac a carpetes del ubuntu, tot i que la meva màquina virtual em doni una falsa il·lusió de tenir explorador de fitxers compartit.
+Per poder muntar-ho he hagut de desplaçar els volums a carpetes de sistema de ubuntu i muntar-ho des-de allà, i així sí he pogut explorar el contingut dels volums.
 
 ### Problemes observats
 
@@ -270,9 +278,9 @@ Pel que fa als problemes, hi ha hagut uns quants. Principalment per entendre com
 
 He realitzar nombroses cerques a internet i visites a dubtes per poder entendre exactament com navegar els diferents sistemes de fitxers i entendre com plantejar cada fase.
 
-Més enllà de problemes de plantejament, he tingut problemes com el esmenat a la part de proves realitzades, on per comprovar el contingut dels volums se’ns va recomanar realitzar un mount dels diferents sistemes de fitxers però no he estat capaç de fer funcionar aquest mount ni des del meu MacBook, ni des-de matagalls/montserrat, ni des-de la meva màquina virtual ubuntu.
+Més enllà de problemes de plantejament, he tingut problemes com el esmenat a la part de proves realitzades, on per comprovar el contingut dels volums se’ns va recomanar realitzar un mount dels diferents sistemes de fitxers però vaig estar capaç de fer funcionar aquest mount ni des del meu MacBook, ni des-de matagalls/montserrat, ni des-de la meva màquina virtual ubuntu.
 
-La solució a aquest problema ha estat demanar que un company realitzés el mount i em passés la carpeta resultant, per poder tenir constància del contingut de cada un dels sistemes de fitxers.
+Va ser fent una bona recerca que vaig trobar que no podia fer muntatge de volums “cross platform”, és a dir, muntar fitxers del mac al ubuntu, o del mac al mac. Havien de ser fitxers que es trobessin al ubuntu i que el punt de muntatge s’hi trobés també completament al ubuntu.
 
 ### Estimació Temporal
 

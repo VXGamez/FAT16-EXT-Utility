@@ -157,8 +157,6 @@ void EXT_deleteFile(int fdVolum, SB* sb, int inode, inodo ff ){
 
     if (ff.i_block[0] != 0){
         ff.i_size = 0;
-        //ff.i_links_count = 0;
-        //ff.i_mode = 0;
         ff.i_flags = 0x00000040;
         ff.i_dtime = time(0);
         for (int n = 0; n < 12; n++){

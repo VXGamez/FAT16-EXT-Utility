@@ -61,6 +61,7 @@ int FAT_findFile(char* fitxer, int fdFitxer, BootSector *bs, char* ext, int N, i
     uint32_t firstDataSector =  (bs->BPB_RsvdSecCnt+(bs->BPB_NumFATs*bs->BPB_FATSz16))* bs->BPB_BytsPerSec ;
 
     uint32_t final = ((N-2) * bs->BPB_SecPerClus * bs->BPB_BytsPerSec) + firstDataSector ;
+
     if(N!=2){
         final = final + rootDir;
     }
